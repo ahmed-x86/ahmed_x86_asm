@@ -1,0 +1,7 @@
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+ahmed-x86-asm-0.0.1.vsix
+test123/

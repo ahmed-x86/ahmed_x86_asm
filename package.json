@@ -1,0 +1,50 @@
+{
+  "name": "ahmed-x86-asm",
+  "publisher": "ahmed-x86",
+  "displayName": "ahmed_x86_asm",
+  "description": "run assembly code",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.108.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ahmed-x86-asm.run",
+        "title": "Run x86 Assembly (ahmed_x86)",
+        "icon": "$(play)"
+      }
+    ],
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "ahmed-x86-asm.run",
+          "when": "resourceExtname =~ /\\.(asm|s|S|inc|mac|nasm|masm|uasm)$/ || resourceLangId =~ /(assembly|fasm|nasm|masm|uasm|x86|gas)/"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.108.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.56.1",
+    "eslint": "^9.39.3",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}

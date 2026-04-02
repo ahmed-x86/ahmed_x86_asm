@@ -1,9 +1,9 @@
 {
   "name": "ahmed-x86-asm",
   "publisher": "ahmed-x86",
-  "displayName": "ahmed_x86_asm",
+  "displayName": "ahmed-x86 asm",
   "description": "run assembly code",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.108.0"

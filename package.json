@@ -2,14 +2,28 @@
   "name": "ahmed-x86-asm",
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
-  "description": "run assembly code",
+  "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
   "version": "1.0.1",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.108.0"
   },
   "categories": [
+    "Programming Languages",
     "Other"
+  ],
+  "keywords": [
+    "ahmed",
+    "ahmed-x86",
+    "ahmed-x86 asm",
+    "assembly",
+    "asm",
+    "x86",
+    "nasm",
+    "uasm",
+    "irvine",
+    "linux",
+    "windows"
   ],
   "activationEvents": [],
   "main": "./out/extension.js",

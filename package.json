@@ -3,7 +3,7 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed_x86_asm",
   "description": "run assembly code",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.108.0"

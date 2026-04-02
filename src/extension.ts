@@ -5,7 +5,7 @@ import * as path from 'path';
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('ahmed-x86-asm.run', async () => {
         
-        // 1. فحص نظام التشغيل أولاً
+        
         if (os.platform() !== 'linux') {
             vscode.window.showErrorMessage('This system is not supported yet');
             return;
@@ -21,9 +21,9 @@ export function activate(context: vscode.ExtensionContext) {
         const filePath = editor.document.fileName;
         const fileDir = path.dirname(filePath);
         const fileName = path.basename(filePath);
-        const baseName = path.parse(fileName).name; // اسم الملف بدون الامتداد
+        const baseName = path.parse(fileName).name; 
 
-        // 3. عرض الخيارات الـ 10
+        
         const options = [
             "1) Linux64 Native (_start)",
             "2) Linux64 Native (main)",
@@ -42,10 +42,10 @@ export function activate(context: vscode.ExtensionContext) {
         });
 
         if (!selection) {
-            return; // لو المستخدم قفل القائمة بدون اختيار
+            return; 
         }
 
-        // 4. تحديد الأمر بناءً على الاختيار
+        
         const selectedIndex = options.indexOf(selection) + 1;
         let cmd = '';
 
@@ -89,9 +89,9 @@ export function activate(context: vscode.ExtensionContext) {
         }
         
         terminal.show();
-        // الذهاب لمسار الملف الأول علشان الأوامر تتنفذ في المكان الصح
+        
         terminal.sendText(`cd "${fileDir}"`);
-        // تنفيذ أمر التجميع والتشغيل
+        
         terminal.sendText(cmd);
     });
 

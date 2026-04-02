@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
         const baseName = path.parse(fileName).name; 
 
         
-        const irvinePath = '~/Irvine/irvine';
+        const irvinePath = path.join(os.homedir(), 'Irvine', 'irvine');
 
         
         const options = [

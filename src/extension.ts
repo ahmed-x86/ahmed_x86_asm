@@ -11,7 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        // 2. الحصول على الملف الحالي
+        
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.window.showErrorMessage('Oops, looks like no file is open! 😅');
@@ -22,6 +22,9 @@ export function activate(context: vscode.ExtensionContext) {
         const fileDir = path.dirname(filePath);
         const fileName = path.basename(filePath);
         const baseName = path.parse(fileName).name; 
+
+        
+        const irvinePath = '~/Irvine/irvine';
 
         
         const options = [
@@ -38,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
         ];
 
         const selection = await vscode.window.showQuickPick(options, {
-            placeHolder: 'Choose build mode:'
+            placeHolder: `Choose build mode (Irvine Path: ${irvinePath}):`
         });
 
         if (!selection) {
@@ -63,7 +66,7 @@ export function activate(context: vscode.ExtensionContext) {
                 cmd = `nasm -f elf32 "${fileName}" -o "${baseName}.o" && ld -m elf_i386 -e main "${baseName}.o" -o "${baseName}" && ./"${baseName}"`;
                 break;
             case 5:
-                cmd = `uasm -q -coff -I./irvine "${fileName}" -Fo"${baseName}.o" && i686-w64-mingw32-gcc "${baseName}.o" ./irvine/Irvine32.lib -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 && WINEDEBUG=-all wine "${baseName}.exe"`;
+                cmd = `uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o" && i686-w64-mingw32-gcc "${baseName}.o" "${irvinePath}/Irvine32.lib" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 && WINEDEBUG=-all wine "${baseName}.exe"`;
                 break;
             case 6:
                 cmd = `nasm -f win32 "${fileName}" -o "${baseName}.obj" && i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 && WINEDEBUG=-all wine "${baseName}.exe"`;
@@ -72,7 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
                 cmd = `nasm -f win64 "${fileName}" -o "${baseName}.obj" && x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 && WINEDEBUG=-all wine "${baseName}.exe"`;
                 break;
             case 8:
-                cmd = `uasm -q -coff -I./irvine "${fileName}" -Fo"${baseName}.o" && i686-w64-mingw32-gcc "${baseName}.o" ./irvine/Irvine32.lib -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main && WINEDEBUG=-all wine "${baseName}.exe"`;
+                cmd = `uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o" && i686-w64-mingw32-gcc "${baseName}.o" "${irvinePath}/Irvine32.lib" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main && WINEDEBUG=-all wine "${baseName}.exe"`;
                 break;
             case 9:
                 cmd = `nasm -f win32 "${fileName}" -o "${baseName}.obj" && i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main && WINEDEBUG=-all wine "${baseName}.exe"`;
@@ -82,7 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
                 break;
         }
 
-        // 5. فتح التيرمينال وتنفيذ الكود
+        
         let terminal = vscode.window.activeTerminal;
         if (!terminal || terminal.name !== "ahmed_x86_asm") {
             terminal = vscode.window.createTerminal("ahmed_x86_asm");

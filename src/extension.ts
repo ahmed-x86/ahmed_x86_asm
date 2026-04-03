@@ -185,6 +185,11 @@ export function activate(context: vscode.ExtensionContext) {
         
         terminal.show();
         terminal.sendText(`cd "${fileDir}"`);
+        
+        // ميزة تنظيف الطرفية التلقائي (الجديدة)
+        terminal.sendText(platform === 'win32' ? 'cls' : 'clear');
+        
+        // تنفيذ الكود
         terminal.sendText(cmd);
     });
 

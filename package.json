@@ -3,8 +3,9 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
   "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "icon": "icon.png",
+  "license": "GPL-3.0-or-later",
   "engines": {
     "vscode": "^1.108.0"
   },
@@ -25,9 +26,15 @@
     "linux",
     "windows"
   ],
-  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "assembly",
+        "extensions": [".asm", ".s", ".inc", ".nasm", ".masm", ".uasm"],
+        "aliases": ["Assembly", "asm", "x86 Assembly"]
+      }
+    ],
     "commands": [
       {
         "command": "ahmed-x86-asm.run",
@@ -39,7 +46,8 @@
       "editor/title/run": [
         {
           "command": "ahmed-x86-asm.run",
-          "when": "resourceExtname =~ /\\.(asm|s|S|inc|mac|nasm|masm|uasm)$/ || resourceLangId =~ /(assembly|fasm|nasm|masm|uasm|x86|gas)/"
+          "group": "navigation@1",
+          "when": "resourceLangId == assembly || resourceExtname =~ /\\.(asm|s|S|inc|mac|nasm|masm|uasm)$/"
         }
       ]
     }

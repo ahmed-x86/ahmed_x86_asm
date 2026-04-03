@@ -3,7 +3,7 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
   "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {
@@ -31,7 +31,6 @@
     "gcc",
     "masm",
     "mingw",
-    "masm",
     "fasm",
     "ahmed x86 asm",
     "ahmed_x86 asm",
@@ -48,6 +47,12 @@
     "onLanguage:assembly"
   ],
   "contributes": {
+    "snippets": [
+      {
+        "language": "assembly",
+        "path": "./snippets.json"
+      }
+    ],
     "languages": [
       {
         "id": "assembly",

@@ -27,6 +27,27 @@ async function getIrvinePath(context: vscode.ExtensionContext): Promise<string |
     return irvinePath;
 }
 
+// دالة ذكية لتحليل الكود وتوقع خيار التشغيل المناسب
+function detectBestOption(fileText: string, platform: string): { index: number, name: string } {
+    const textLower = fileText.toLowerCase();
+    
+    // البحث عن الكلمات المفتاحية
+    const hasIrvine = textLower.includes('irvine32.inc');
+    const hasMain = textLower.includes('main proc') || textLower.includes('main:');
+    const is64Bit = textLower.includes('bits 64') || textLower.includes('elf64') || textLower.includes('win64') || textLower.includes('rax');
+
+    if (platform === 'linux') {
+        if (hasIrvine) return hasMain ? { index: 8, name: "Win32 Irvine (main)" } : { index: 5, name: "Win32 Irvine" };
+        if (is64Bit) return hasMain ? { index: 2, name: "Linux64 Native (main)" } : { index: 1, name: "Linux64 Native (_start)" };
+        return hasMain ? { index: 4, name: "Linux32 Native (main)" } : { index: 3, name: "Linux32 Native (_start)" };
+    } else {
+        // Windows (win32)
+        if (hasIrvine) return hasMain ? { index: 4, name: "Win32 Irvine (Custom main)" } : { index: 1, name: "Win32 Irvine (Standard)" };
+        if (is64Bit) return hasMain ? { index: 6, name: "Win64 Standalone (Custom main)" } : { index: 3, name: "Win64 Standalone (Standard)" };
+        return hasMain ? { index: 5, name: "Win32 Standalone (Custom main)" } : { index: 2, name: "Win32 Standalone (Standard)" };
+    }
+}
+
 export function activate(context: vscode.ExtensionContext) {
     
     // أمر إعادة تعيين المسار
@@ -56,14 +77,20 @@ export function activate(context: vscode.ExtensionContext) {
         const fileName = path.basename(filePath);
         const baseName = path.parse(fileName).name; 
 
+        // قراءة محتوى الملف لتحليله
+        const fileText = editor.document.getText();
+        const autoDetected = detectBestOption(fileText, platform);
+
         let options: string[] = [];
         let cmd = '';
+        let selectedIndex = 0;
 
         // استدعاء المسار لعرضه
         const currentIrvinePath = context.globalState.get<string>('irvineLibPath') || "Not Set";
 
         if (platform === 'linux') {
             options = [
+                `✨ Auto Detect: ${autoDetected.name}`,
                 "1) Linux64 Native (_start)",
                 "2) Linux64 Native (main)",
                 "3) Linux32 Native (_start)",
@@ -82,7 +109,13 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (!selection) return;
 
-            const selectedIndex = options.indexOf(selection) + 1;
+            // تحديد الـ Index بناءً على اختيار المستخدم
+            if (selection.startsWith('✨ Auto Detect')) {
+                selectedIndex = autoDetected.index;
+            } else {
+                selectedIndex = parseInt(selection.split(')')[0]);
+            }
+
             let irvinePath = "";
 
             if (selectedIndex === 5 || selectedIndex === 8) {
@@ -105,6 +138,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         } else if (platform === 'win32') {
             options = [
+                `✨ Auto Detect: ${autoDetected.name}`,
                 "1) Win32 Irvine (Standard)",
                 "2) Win32 Standalone (Standard)",
                 "3) Win64 Standalone (Standard)",
@@ -119,7 +153,13 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (!selection) return;
 
-            const selectedIndex = options.indexOf(selection) + 1;
+            // تحديد الـ Index بناءً على اختيار المستخدم
+            if (selection.startsWith('✨ Auto Detect')) {
+                selectedIndex = autoDetected.index;
+            } else {
+                selectedIndex = parseInt(selection.split(')')[0]);
+            }
+
             let irvinePath = "";
 
             if (selectedIndex === 1 || selectedIndex === 4) {

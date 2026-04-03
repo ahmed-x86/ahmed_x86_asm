@@ -3,7 +3,7 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
   "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {
@@ -24,9 +24,20 @@
     "uasm",
     "irvine",
     "linux",
-    "windows"
+    "windows",
+    "x86-64",
+    "runner",
+    "compiler",
+    "gcc",
+    "masm",
+    "mingw"
   ],
   "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:ahmed-x86-asm.run",
+    "onCommand:ahmed-x86-asm.resetIrvinePath",
+    "onLanguage:assembly"
+  ],
   "contributes": {
     "languages": [
       {
@@ -40,6 +51,10 @@
         "command": "ahmed-x86-asm.run",
         "title": "Run x86 Assembly (ahmed_x86)",
         "icon": "$(play)"
+      },
+      {
+        "command": "ahmed-x86-asm.resetIrvinePath",
+        "title": "Reset Irvine Library Path"
       }
     ],
     "menus": {

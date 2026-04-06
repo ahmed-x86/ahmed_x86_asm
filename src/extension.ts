@@ -1,6 +1,92 @@
 import * as vscode from 'vscode';
 import * as os from 'os';
 import * as path from 'path';
+import * as cp from 'child_process';
+
+// دالة لتنفيذ أوامر الطرفية وجلب السطر الأول
+async function runCmd(cmd: string): Promise<{ success: boolean, output: string }> {
+    return new Promise((resolve) => {
+        cp.exec(cmd, (error, stdout, stderr) => {
+            const output = (stdout || stderr || '').trim();
+            if (error && !stdout) {
+                resolve({ success: false, output: '' });
+            } else {
+                // تنظيف المخرجات من أي أحرف غريبة قد تسبب مشاكل في العرض
+                const firstLine = output.split('\n')[0].trim().replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+                resolve({ success: true, output: firstLine });
+            }
+        });
+    });
+}
+
+// دالة فحص الحزم باستخدام واجهة الإشعارات التقدمية (Progress Notification)
+async function checkDependencies(platform: string) {
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "ahmed-x86 ASM:",
+        cancellable: false
+    }, async (progress) => {
+        
+        let messageItems: string[] = [];
+        progress.report({ message: "Checking dependencies..." });
+
+        if (platform === 'linux') {
+            const deps = [
+                { name: 'nasm', cmd: 'nasm -v' },
+                { name: 'binutils', cmd: 'ld -v' },
+                { name: 'wine', cmd: 'wine --version' },
+                { name: 'uasm', cmd: 'uasm -h' }
+            ];
+
+            const total = deps.length;
+            for (let i = 0; i < total; i++) {
+                const dep = deps[i];
+                progress.report({ message: `Checking ${dep.name}...`, increment: (100 / total) });
+                
+                const res = await runCmd(dep.cmd);
+                if (res.success && res.output) {
+                    messageItems.push(`${dep.name} : Installed ✅`);
+                } else {
+                    messageItems.push(`${dep.name} : Not Installed ❌`);
+                }
+            }
+        } else if (platform === 'win32') {
+            const deps = [
+                { name: 'uasm', abs: 'C:\\msys64\\mingw64\\bin\\uasm.exe -h', global: 'uasm -h' },
+                { name: 'nasm', abs: 'C:\\msys64\\mingw64\\bin\\nasm.exe -v', global: 'nasm -v' },
+                { name: 'i686-gcc', abs: 'C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe --version', global: 'i686-w64-mingw32-gcc --version' },
+                { name: 'x86_64-gcc', abs: 'C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe --version', global: 'x86_64-w64-mingw32-gcc --version' }
+            ];
+
+            const total = deps.length;
+            for (let i = 0; i < total; i++) {
+                const dep = deps[i];
+                progress.report({ message: `Checking ${dep.name}...`, increment: (100 / total) });
+                
+                const absRes = await runCmd(dep.abs);
+                const globalRes = await runCmd(dep.global);
+
+                const isInstalled = absRes.success || globalRes.success;
+                
+                if (isInstalled) {
+                    messageItems.push(`${dep.name} : Installed ✅`);
+                } else {
+                    messageItems.push(`${dep.name} : Not Installed ❌`);
+                }
+            }
+        }
+
+        // خدعة التأخير الزمني لكي تظهر جميع الإشعارات متراصة دون أن يخفيها VS Code
+        if (messageItems.length > 0) {
+            vscode.window.showInformationMessage("🔍 ahmed-x86 Dependencies:");
+            for (const msg of messageItems) {
+                // تأخير 300 ملي ثانية بين كل إشعار والثاني
+                await new Promise(resolve => setTimeout(resolve, 300));
+                vscode.window.showInformationMessage(msg);
+            }
+        }
+    });
+}
 
 // دالة مساعدة للحصول على مسار مكتبة Irvine وحفظه
 async function getIrvinePath(context: vscode.ExtensionContext): Promise<string | undefined> {
@@ -49,7 +135,23 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    
+    const currentPlatform = os.platform();
+
+    // فحص الحزم عند أول تشغيل للإضافة فقط
+    const hasCheckedDeps = context.globalState.get<boolean>('hasCheckedDeps_v108');
+    if (!hasCheckedDeps) {
+        if (currentPlatform === 'linux' || currentPlatform === 'win32') {
+            // تشغيل الفحص في الخلفية دون تعطيل عمل المستخدم
+            checkDependencies(currentPlatform);
+            context.globalState.update('hasCheckedDeps_v108', true); // حفظ الحالة
+        }
+    }
+
+    // أمر فحص الحزم اليدوي
+    let checkDepsDisposable = vscode.commands.registerCommand('ahmed-x86-asm.checkDeps', () => {
+        checkDependencies(currentPlatform);
+    });
+
     // أمر إعادة تعيين المسار
     let resetPathDisposable = vscode.commands.registerCommand('ahmed-x86-asm.resetIrvinePath', async () => {
         await context.globalState.update('irvineLibPath', undefined);
@@ -186,14 +288,15 @@ export function activate(context: vscode.ExtensionContext) {
         terminal.show();
         terminal.sendText(`cd "${fileDir}"`);
         
-        // ميزة تنظيف الطرفية التلقائي (الجديدة)
+        // ميزة تنظيف الطرفية التلقائي
         terminal.sendText(platform === 'win32' ? 'cls' : 'clear');
         
         // تنفيذ الكود
         terminal.sendText(cmd);
     });
 
-    // تسجيل الأمرين معاً
+    // تسجيل الأوامر معاً
+    context.subscriptions.push(checkDepsDisposable);
     context.subscriptions.push(resetPathDisposable);
     context.subscriptions.push(runDisposable);
 }

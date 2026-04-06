@@ -3,7 +3,7 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
   "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {
@@ -38,12 +38,15 @@
     "x64",
     "x86_64",
     "32bit",
-    "64bit"
+    "64bit",
+    "gdb",
+    "ahmed-x86 asm"
   ],
   "main": "./out/extension.js",
   "activationEvents": [
     "onCommand:ahmed-x86-asm.run",
     "onCommand:ahmed-x86-asm.resetIrvinePath",
+    "onCommand:ahmed-x86-asm.checkDeps",
     "onLanguage:assembly",
     "onLanguage:asm",
     "onLanguage:masm",
@@ -76,8 +79,19 @@
     "languages": [
       {
         "id": "assembly",
-        "extensions": [".asm", ".s", ".inc", ".nasm", ".masm", ".uasm"],
-        "aliases": ["Assembly", "asm", "x86 Assembly"]
+        "extensions": [
+          ".asm",
+          ".s",
+          ".inc",
+          ".nasm",
+          ".masm",
+          ".uasm"
+        ],
+        "aliases": [
+          "Assembly",
+          "asm",
+          "x86 Assembly"
+        ]
       }
     ],
     "commands": [
@@ -89,6 +103,10 @@
       {
         "command": "ahmed-x86-asm.resetIrvinePath",
         "title": "Reset Irvine Library Path"
+      },
+      {
+        "command": "ahmed-x86-asm.checkDeps",
+        "title": "Check ASM Dependencies (ahmed_x86)"
       }
     ],
     "menus": {
@@ -110,13 +128,17 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.108.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "typescript-eslint": "^8.56.1",
+    "@types/vscode": "^1.108.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.39.3",
     "typescript": "^5.9.3",
-    "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "typescript-eslint": "^8.56.1"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1"
   }
 }

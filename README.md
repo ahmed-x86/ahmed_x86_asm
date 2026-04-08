@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.0.8/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.0.9/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -26,6 +26,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ## ✨ Features
 
 - **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords to instantly recommend the perfect build mode (see table below).
+- **🔗 Dynamic Linker Optimizer (New in v1.0.9!)**: Automatically runs a silent background test to detect and adopt the most stable Windows linking method (`ld` vs `gcc`) for your specific OS (Windows 10/11), preventing compilation errors.
 - **📦 Smart Dependency Checker**: Automatically verifies if required tools (nasm, gcc, uasm, wine) are installed via a sleek notification stack.
 - **📝 Quick Snippets**: Instantly generate full assembly boilerplate code using fast prefix keywords (see Snippets section).
 - **🧹 Auto-Clear Terminal**: Keeps your workspace clean by automatically clearing the terminal before every new run.
@@ -36,12 +37,15 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 - **⚙️ Multi-Assembler Support**: Smartly utilizes `NASM` for standalone builds and `UASM` for Irvine library projects.
 - **📁 Broad Compatibility**: Automatically detects a wide range of assembly extensions (`.asm`, `.s`, `.S`, `.inc`, `.nasm`, `.masm`, `.uasm`).
 
+
+
 ---
 
 ## 🎛️ Extension Commands
 You can access these features at any time via the Command Palette (`Ctrl + Shift + P`):
 - `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify all required compilers and linkers are installed.
 - `Reset Irvine Library Path`: Clears your saved Irvine directory so you can select a new one.
+- `Reset Win32 Linker Method`: Clears your automatically adopted Windows linker preference, forcing the extension to re-test the best linking method on your next run.
 
 ---
 

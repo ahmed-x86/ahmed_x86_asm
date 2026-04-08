@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.1.0/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.1.1/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -26,8 +26,9 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ## ✨ Features
 
 - **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords to instantly recommend the perfect build mode (see table below).
-- **📦 Smart Dependency Checker (Enhanced in v1.1.0!)**: Automatically verifies if required tools (nasm, gcc, uasm, wine) are installed via a sleek notification stack. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html) in your browser to help you get set up instantly.**
-- **🔗 Dynamic Linker Optimizer (New in v1.0.9!)**: Automatically runs a silent background test to detect and adopt the most stable Windows linking method (`ld` vs `gcc`) for your specific OS (Windows 10/11), preventing compilation errors.
+- **🖥️ Sequential Terminal Execution (New in v1.1.1!)**: Commands are now sent sequentially to the terminal instead of a single giant chained command. This means a dramatically cleaner output, easier debugging, and a much smoother visual experience when compiling.
+- **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine) are installed via a sleek notification stack. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html) in your browser to help you get set up instantly.**
+- **🔗 Dynamic Linker Optimizer**: Automatically runs a silent background test to detect and adopt the most stable Windows linking method (`ld` vs `gcc`) for your specific OS (Windows 10/11), preventing compilation errors.
 - **📝 Quick Snippets**: Instantly generate full assembly boilerplate code using fast prefix keywords (see Snippets section).
 - **🧹 Auto-Clear Terminal**: Keeps your workspace clean by automatically clearing the terminal before every new run.
 - **⚡ One-Click Execution**: Integrated directly into the editor's Run button menu.

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.1.1/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.1.4/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -26,7 +26,8 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ## ✨ Features
 
 - **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords to instantly recommend the perfect build mode (see table below).
-- **🖥️ Sequential Terminal Execution (New in v1.1.1!)**: Commands are now sent sequentially to the terminal instead of a single giant chained command. This means a dramatically cleaner output, easier debugging, and a much smoother visual experience when compiling.
+- **🎛️ Manual Win32 Linker Override (New in v1.1.4!)**: You now have full manual control to switch between `ld` and `gcc` linkers directly from the Command Palette, ensuring maximum stability across different Windows environments.
+- **🖥️ Sequential Terminal Execution**: Commands are sent sequentially to the terminal instead of a single giant chained command. This means a dramatically cleaner output, easier debugging, and a much smoother visual experience when compiling.
 - **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine) are installed via a sleek notification stack. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html) in your browser to help you get set up instantly.**
 - **🔗 Dynamic Linker Optimizer**: Automatically runs a silent background test to detect and adopt the most stable Windows linking method (`ld` vs `gcc`) for your specific OS (Windows 10/11), preventing compilation errors.
 - **📝 Quick Snippets**: Instantly generate full assembly boilerplate code using fast prefix keywords (see Snippets section).
@@ -44,7 +45,8 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 You can access these features at any time via the Command Palette (`Ctrl + Shift + P`):
 - `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify all required compilers and linkers are installed.
 - `Reset Irvine Library Path`: Clears your saved Irvine directory so you can select a new one.
-- `Reset Win32 Linker Method`: Clears your automatically adopted Windows linker preference, forcing the extension to re-test the best linking method on your next run.
+- `Change Win32 Linker Method (ahmed_x86)`: **[NEW]** Manually switch your Windows linker preference between `ld` and `gcc`.
+- `Reset Win32 Linker to Auto (ahmed_x86)`: Clears your automatically or manually adopted Windows linker preference, forcing the extension to re-test the best linking method on your next run.
 
 ---
 

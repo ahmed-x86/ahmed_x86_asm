@@ -224,6 +224,26 @@ export function activate(context: vscode.ExtensionContext) {
     });
     // ----------------------------------------------------
 
+    // --- ميزة v1.1.4 الجديدة: تغيير الـ Linker يدوياً ---
+    let setLinkerDisposable = vscode.commands.registerCommand('ahmed-x86-asm.setLinkerMethod', async () => {
+        const currentMethod = context.globalState.get<string>('win32LinkerMethod') || 'Auto (Not set)';
+        
+        const options = [
+            { label: 'ld', description: 'Use GNU Linker (ld.exe)' },
+            { label: 'gcc', description: 'Use GCC as Linker (gcc.exe)' }
+        ];
+
+        const selection = await vscode.window.showQuickPick(options, {
+            placeHolder: `Select Win32 Linker Method | Current: ${currentMethod}`
+        });
+
+        if (selection) {
+            await context.globalState.update('win32LinkerMethod', selection.label);
+            vscode.window.showInformationMessage(`Win32 Linker method successfully set to: ${selection.label.toUpperCase()} ✅`);
+        }
+    });
+    // ----------------------------------------------------
+
     // أمر التشغيل الرئيسي
     let runDisposable = vscode.commands.registerCommand('ahmed-x86-asm.run', async () => {
         
@@ -385,6 +405,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(checkDepsDisposable);
     context.subscriptions.push(resetPathDisposable);
     context.subscriptions.push(resetLinkerDisposable); // <--- الإضافة الجديدة
+    context.subscriptions.push(setLinkerDisposable);   // <--- تم تسجيل أمر تغيير الـ Linker الجديد هنا
     context.subscriptions.push(runDisposable);
 }
 

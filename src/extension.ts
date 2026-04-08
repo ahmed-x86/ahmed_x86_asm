@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import * as path from 'path';
 import * as cp from 'child_process';
+import * as fs from 'fs'; // <--- إضافة جديدة لكتابة ملف الاختبار الوهمي
 
 // دالة لتنفيذ أوامر الطرفية وجلب السطر الأول
 async function runCmd(cmd: string): Promise<{ success: boolean, output: string }> {
@@ -113,6 +114,51 @@ async function getIrvinePath(context: vscode.ExtensionContext): Promise<string |
     return irvinePath;
 }
 
+// --- الإضافة الجديدة: دالة الاختبار الصامت لاختيار أفضل طريقة ربط (Linker) في الويندوز ---
+async function detectBestWin32Linker(context: vscode.ExtensionContext): Promise<string> {
+    let method = context.globalState.get<string>('win32LinkerMethod');
+    if (method) return method;
+
+    return await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "ahmed-x86 ASM: Optimizing Windows linker...",
+        cancellable: false
+    }, async (progress) => {
+        const tmpdir = os.tmpdir();
+        const dummyAsm = path.join(tmpdir, 'ahmed_dummy.asm');
+        const dummyObj = path.join(tmpdir, 'ahmed_dummy.obj');
+        const dummyExe = path.join(tmpdir, 'ahmed_dummy.exe');
+
+        fs.writeFileSync(dummyAsm, 'global _main\nsection .text\n_main:\nret\n');
+        await runCmd(`C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${dummyAsm}" -o "${dummyObj}"`);
+
+        let bestMethod = 'gcc'; 
+        const ldCmd = `C:\\msys64\\mingw32\\bin\\ld.exe "${dummyObj}" -o "${dummyExe}" -lkernel32 -luser32 -e _main -L C:\\msys64\\mingw32\\lib`;
+        const ldRes = await runCmd(ldCmd);
+
+        if (ldRes.success) {
+            bestMethod = 'ld'; 
+        } else {
+            const gccCmd = `C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${dummyObj}" -o "${dummyExe}" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`;
+            const gccRes = await runCmd(gccCmd);
+            if (gccRes.success) {
+                bestMethod = 'gcc';
+            }
+        }
+
+        try {
+            if (fs.existsSync(dummyAsm)) fs.unlinkSync(dummyAsm);
+            if (fs.existsSync(dummyObj)) fs.unlinkSync(dummyObj);
+            if (fs.existsSync(dummyExe)) fs.unlinkSync(dummyExe);
+        } catch (e) {}
+
+        await context.globalState.update('win32LinkerMethod', bestMethod);
+        vscode.window.showInformationMessage(`Linker method adopted: ${bestMethod.toUpperCase()} ✅`);
+        return bestMethod;
+    });
+}
+// --------------------------------------------------------------------------
+
 // دالة ذكية لتحليل الكود وتوقع خيار التشغيل المناسب
 function detectBestOption(fileText: string, platform: string): { index: number, name: string } {
     const textLower = fileText.toLowerCase();
@@ -157,6 +203,13 @@ export function activate(context: vscode.ExtensionContext) {
         await context.globalState.update('irvineLibPath', undefined);
         vscode.window.showInformationMessage('Irvine library path has been reset. You will be prompted to select it again next time.');
     });
+
+    // --- الإضافة الجديدة: أمر إعادة تعيين الـ Linker ---
+    let resetLinkerDisposable = vscode.commands.registerCommand('ahmed-x86-asm.resetLinkerMethod', async () => {
+        await context.globalState.update('win32LinkerMethod', undefined);
+        vscode.window.showInformationMessage('Win32 Linker method has been reset. The extension will test again next run.');
+    });
+    // ----------------------------------------------------
 
     // أمر التشغيل الرئيسي
     let runDisposable = vscode.commands.registerCommand('ahmed-x86-asm.run', async () => {
@@ -269,15 +322,32 @@ export function activate(context: vscode.ExtensionContext) {
                 if (!pathResult) return;
                 irvinePath = pathResult;
             }
-            
-            switch (selectedIndex) {
-                case 1: cmd = `C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -w '-Wl,--subsystem,console' ; & ".\\${baseName}.exe"`; break;
-                case 2: cmd = `C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 ; & ".\\${baseName}.exe"`; break;
-                case 3: cmd = `C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj" ; C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 ; & ".\\${baseName}.exe"`; break;
-                case 4: cmd = `C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -w '-Wl,-e_main' '-Wl,--subsystem,console' '-Wl,--enable-stdcall-fixup' 2>$null ; & ".\\${baseName}.exe"`; break;
-                case 5: cmd = `C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-e_main' ; & ".\\${baseName}.exe"`; break;
-                case 6: cmd = `C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj" ; C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-emain' ; & ".\\${baseName}.exe"`; break;
+
+            // --- الإضافة الجديدة: فحص واعتماد الطريقة الأنسب ---
+            const linkerMethod = await detectBestWin32Linker(context);
+
+            if (linkerMethod === 'ld') {
+                // الكود المحدث للحالة القديمة
+                switch (selectedIndex) {
+                    case 1: cmd = `cmd /c "C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}" && C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -lkernel32 -luser32 --subsystem console -L C:\\msys64\\mingw32\\lib && ${baseName}.exe"`; break;
+                    case 2: cmd = `cmd /c "C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj" && C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -L C:\\msys64\\mingw32\\lib && ${baseName}.exe"`; break;
+                    case 3: cmd = `cmd /c "C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj" && C:\\msys64\\mingw64\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -L C:\\msys64\\mingw64\\lib && ${baseName}.exe"`; break;
+                    case 4: cmd = `cmd /c "C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}" && C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -lkernel32 -luser32 -e _main --subsystem console -L C:\\msys64\\mingw32\\lib && ${baseName}.exe"`; break;
+                    case 5: cmd = `cmd /c "C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj" && C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e _main -L C:\\msys64\\mingw32\\lib && ${baseName}.exe"`; break;
+                    case 6: cmd = `cmd /c "C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj" && C:\\msys64\\mingw64\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e main -L C:\\msys64\\mingw64\\lib && ${baseName}.exe"`; break;
+                }
+            } else {
+                // الكود الاصلي للحالة القديمة
+                switch (selectedIndex) {
+                    case 1: cmd = `C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -w '-Wl,--subsystem,console' ; & ".\\${baseName}.exe"`; break;
+                    case 2: cmd = `C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 ; & ".\\${baseName}.exe"`; break;
+                    case 3: cmd = `C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj" ; C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 ; & ".\\${baseName}.exe"`; break;
+                    case 4: cmd = `C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -w '-Wl,-e_main' '-Wl,--subsystem,console' '-Wl,--enable-stdcall-fixup' 2>$null ; & ".\\${baseName}.exe"`; break;
+                    case 5: cmd = `C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-e_main' ; & ".\\${baseName}.exe"`; break;
+                    case 6: cmd = `C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj" ; C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-emain' ; & ".\\${baseName}.exe"`; break;
+                }
             }
+            // ----------------------------------------------------
         }
 
         let terminal = vscode.window.activeTerminal;
@@ -298,6 +368,7 @@ export function activate(context: vscode.ExtensionContext) {
     // تسجيل الأوامر معاً
     context.subscriptions.push(checkDepsDisposable);
     context.subscriptions.push(resetPathDisposable);
+    context.subscriptions.push(resetLinkerDisposable); // <--- الإضافة الجديدة
     context.subscriptions.push(runDisposable);
 }
 

@@ -29,6 +29,7 @@ async function checkDependencies(platform: string) {
     }, async (progress) => {
         
         let messageItems: string[] = [];
+        let hasMissing = false; // لمعرفة إذا كان هناك أي حزمة ناقصة
         progress.report({ message: "Checking dependencies..." });
 
         if (platform === 'linux') {
@@ -49,6 +50,7 @@ async function checkDependencies(platform: string) {
                     messageItems.push(`${dep.name} : Installed ✅`);
                 } else {
                     messageItems.push(`${dep.name} : Not Installed ❌`);
+                    hasMissing = true;
                 }
             }
         } else if (platform === 'win32') {
@@ -73,8 +75,14 @@ async function checkDependencies(platform: string) {
                     messageItems.push(`${dep.name} : Installed ✅`);
                 } else {
                     messageItems.push(`${dep.name} : Not Installed ❌`);
+                    hasMissing = true;
                 }
             }
+        }
+
+        // --- إضافة رسالة التثبيت إلى المصفوفة لتظهر بنفس النمط ---
+        if (hasMissing) {
+            messageItems.push("for install package");
         }
 
         // خدعة التأخير الزمني لكي تظهر جميع الإشعارات متراصة دون أن يخفيها VS Code
@@ -84,6 +92,11 @@ async function checkDependencies(platform: string) {
                 // تأخير 300 ملي ثانية بين كل إشعار والثاني
                 await new Promise(resolve => setTimeout(resolve, 300));
                 vscode.window.showInformationMessage(msg);
+                
+                // فتح الموقع تلقائياً إذا كانت الرسالة المعروضة هي رابط التثبيت
+                if (msg === "for install package") {
+                    vscode.env.openExternal(vscode.Uri.parse('https://ahmed-x86.github.io/ahmed_x86_asm.html'));
+                }
             }
         }
     });

@@ -3,7 +3,7 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
   "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {

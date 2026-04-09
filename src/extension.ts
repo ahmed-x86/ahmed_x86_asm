@@ -508,22 +508,39 @@ export function activate(context: vscode.ExtensionContext) {
             // ----------------------------------------------------
         }
 
-        // --- الإضافة الجديدة: فحص الأخطاء قبل إرسال الأوامر للطرفية ---
+        // --- الإضافة الجديدة: نظام بناء ذكي لمنع الأخطاء المتسلسلة ---
         if (commands.length > 0) {
-            const assembleCmd = commands[0];      // الأمر الأول هو دائماً nasm أو uasm
-            const restCommands = commands.slice(1); // باقي الأوامر (الربط والتشغيل)
+            const assembleCmd = commands[0];                          // الأمر الأول: المجمع (nasm/uasm)
+            const linkCmd = commands.length > 1 ? commands[1] : null; // الأمر الثاني: الرابط (ld/gcc)
+            const runCommands = commands.length > 2 ? commands.slice(2) : []; // الأوامر المتبقية: التشغيل
 
             vscode.window.withProgress({
                 location: vscode.ProgressLocation.Window,
-                title: "Assembling...",
+                title: "Building Assembly...",
             }, async () => {
-                const isSuccess = await assembleAndDiagnose(assembleCmd, fileDir, editor.document);
+                // 1. فحص الكود والتجميع في الخلفية (Linter)
+                const isAssembleSuccess = await assembleAndDiagnose(assembleCmd, fileDir, editor.document);
+                if (!isAssembleSuccess) return; // توقف التنفيذ لوجود خطأ إملائي في التجميع
 
-                if (!isSuccess) {
-                    return; // توقف التنفيذ ولا تفتح الطرفية، دع المستخدم يرى الخطأ الأحمر
+                // 2. الربط (Linking) في الخلفية لمنع ظهور رسائل الـ Undefined References في الطرفية
+                if (linkCmd) {
+                    const isLinkSuccess = await new Promise<boolean>((resolve) => {
+                        cp.exec(linkCmd, { cwd: fileDir }, (error, stdout, stderr) => {
+                            if (error) {
+                                let errorMsg = (stderr || stdout || error.message).trim();
+                                if (errorMsg.length > 300) errorMsg = errorMsg.substring(0, 300) + '...';
+                                vscode.window.showErrorMessage(`ahmed-x86 Linker Error: ${errorMsg} ❌`);
+                                resolve(false);
+                            } else {
+                                resolve(true);
+                            }
+                        });
+                    });
+
+                    if (!isLinkSuccess) return; // توقف التنفيذ ولا تفتح الطرفية إطلاقاً
                 }
 
-                // الكود سليم، افتح الطرفية ونفذ باقي الأوامر
+                // 3. كل شيء سليم 100%، افتح الطرفية لعرض ناتج البرنامج فقط!
                 let terminal = vscode.window.activeTerminal;
                 if (!terminal || terminal.name !== "ahmed_x86_asm") {
                     terminal = vscode.window.createTerminal("ahmed_x86_asm");
@@ -535,8 +552,8 @@ export function activate(context: vscode.ExtensionContext) {
                 // تنظيف الطرفية
                 terminal.sendText(platform === 'win32' ? 'cls' : 'clear');
                 
-                // نرسل أوامر الـ Linker والتشغيل فقط، لأننا قمنا بالتجميع في الخلفية بالفعل
-                for (const cmd of restCommands) {
+                // تنفيذ أوامر التشغيل فقط
+                for (const cmd of runCommands) {
                     terminal.sendText(cmd);
                 }
             });

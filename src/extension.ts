@@ -508,7 +508,7 @@ export function activate(context: vscode.ExtensionContext) {
             // ----------------------------------------------------
         }
 
-        // --- الإضافة الجديدة: نظام بناء ذكي لمنع الأخطاء المتسلسلة ---
+        // --- الإضافة الجديدة: نظام بناء ذكي مع عرض كافة السجلات في الطرفية ---
         if (commands.length > 0) {
             const assembleCmd = commands[0];                          // الأمر الأول: المجمع (nasm/uasm)
             const linkCmd = commands.length > 1 ? commands[1] : null; // الأمر الثاني: الرابط (ld/gcc)
@@ -518,11 +518,29 @@ export function activate(context: vscode.ExtensionContext) {
                 location: vscode.ProgressLocation.Window,
                 title: "Building Assembly...",
             }, async () => {
+                
+                // تجهيز الطرفية أولاً لكي تظهر فيها الأوامر
+                let terminal = vscode.window.activeTerminal;
+                if (!terminal || terminal.name !== "ahmed_x86_asm") {
+                    terminal = vscode.window.createTerminal("ahmed_x86_asm");
+                }
+                terminal.show(true); // true لعدم سحب التركيز من الكود
+                terminal.sendText(`cd "${fileDir}"`);
+                
+                // تنظيف الطرفية
+                terminal.sendText(platform === 'win32' ? 'cls' : 'clear');
+
                 // 1. فحص الكود والتجميع في الخلفية (Linter)
                 const isAssembleSuccess = await assembleAndDiagnose(assembleCmd, fileDir, editor.document);
-                if (!isAssembleSuccess) return; // توقف التنفيذ لوجود خطأ إملائي في التجميع
+                
+                // إرسال أمر التجميع للطرفية ليراه المستخدم (Log)
+                terminal.sendText(assembleCmd);
 
-                // 2. الربط (Linking) في الخلفية لمنع ظهور رسائل الـ Undefined References في الطرفية
+                if (!isAssembleSuccess) {
+                    return; // توقف التنفيذ لوجود خطأ، والمستخدم سيرى اللوج في الطرفية
+                }
+
+                // 2. الربط (Linking) في الخلفية لاختبار نجاحه
                 if (linkCmd) {
                     const isLinkSuccess = await new Promise<boolean>((resolve) => {
                         cp.exec(linkCmd, { cwd: fileDir }, (error, stdout, stderr) => {
@@ -537,22 +555,15 @@ export function activate(context: vscode.ExtensionContext) {
                         });
                     });
 
-                    if (!isLinkSuccess) return; // توقف التنفيذ ولا تفتح الطرفية إطلاقاً
+                    // إرسال أمر الربط للطرفية ليراه المستخدم
+                    terminal.sendText(linkCmd);
+
+                    if (!isLinkSuccess) {
+                        return; // توقف التنفيذ لمنع الأخطاء المتسلسلة
+                    }
                 }
 
-                // 3. كل شيء سليم 100%، افتح الطرفية لعرض ناتج البرنامج فقط!
-                let terminal = vscode.window.activeTerminal;
-                if (!terminal || terminal.name !== "ahmed_x86_asm") {
-                    terminal = vscode.window.createTerminal("ahmed_x86_asm");
-                }
-                
-                terminal.show(true); // true لعدم سحب التركيز من الكود
-                terminal.sendText(`cd "${fileDir}"`);
-                
-                // تنظيف الطرفية
-                terminal.sendText(platform === 'win32' ? 'cls' : 'clear');
-                
-                // تنفيذ أوامر التشغيل فقط
+                // 3. كل شيء سليم، تنفيذ أوامر التشغيل
                 for (const cmd of runCommands) {
                     terminal.sendText(cmd);
                 }

@@ -571,12 +571,46 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // --- الإضافة الجديدة (v1.1.8): قراءة ملف .err عند وقوف الماوس على الخطأ ---
+    let hoverDisposable = vscode.languages.registerHoverProvider(
+        [{ scheme: 'file', language: 'assembly' }, { scheme: 'file', pattern: '**/*.{asm,s,S,inc,nasm,masm,uasm}' }],
+        {
+            provideHover(document, position, token) {
+                // التحقق مما إذا كان السطر الذي يقف عليه الماوس يحتوي على خطأ أحمر
+                const diagnostics = diagnosticCollection.get(document.uri);
+                const hasErrorOnLine = diagnostics?.some(d => d.range.contains(position));
+
+                if (hasErrorOnLine) {
+                    const filePath = document.fileName;
+                    const parsedPath = path.parse(filePath);
+                    const errFilePath = path.join(parsedPath.dir, parsedPath.name + '.err');
+
+                    if (fs.existsSync(errFilePath)) {
+                        try {
+                            const errContent = fs.readFileSync(errFilePath, 'utf8').trim();
+                            if (errContent) {
+                                const markdown = new vscode.MarkdownString();
+                                markdown.appendMarkdown(`**📄 Log File (${parsedPath.name}.err):**\n`);
+                                markdown.appendCodeblock(errContent, 'log');
+                                return new vscode.Hover(markdown);
+                            }
+                        } catch (e) {
+                            // تجاهل الخطأ بصمت
+                        }
+                    }
+                }
+                return null;
+            }
+        }
+    );
+
     // تسجيل الأوامر معاً
     context.subscriptions.push(checkDepsDisposable);
     context.subscriptions.push(resetPathDisposable);
     context.subscriptions.push(resetLinkerDisposable); 
     context.subscriptions.push(setLinkerDisposable);   
     context.subscriptions.push(runDisposable);
+    context.subscriptions.push(hoverDisposable); // <--- تم تسجيل حدث وقوف الماوس هنا
 }
 
 export function deactivate() {}

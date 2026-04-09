@@ -4,6 +4,15 @@ import * as path from 'path';
 import * as cp from 'child_process';
 import * as fs from 'fs'; // <--- إضافة جديدة لكتابة ملف الاختبار الوهمي
 
+// --- الإضافة الجديدة: أداة الاحتفاظ بالأخطاء وعرضها في المحرر ---
+let diagnosticCollection: vscode.DiagnosticCollection;
+
+// --- الإضافة الجديدة: تصميم الدائرة الحمراء بجانب رقم السطر ---
+const errorGutterDecoration = vscode.window.createTextEditorDecorationType({
+    gutterIconPath: vscode.Uri.parse(`data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Ccircle%20cx%3D%228%22%20cy%3D%228%22%20r%3D%224%22%20fill%3D%22%23e51400%22%2F%3E%3C%2Fsvg%3E`),
+    gutterIconSize: '60%' // حجم الدائرة ليكون صغيراً ومناسباً
+});
+
 // دالة لتنفيذ أوامر الطرفية وجلب السطر الأول
 async function runCmd(cmd: string): Promise<{ success: boolean, output: string }> {
     return new Promise((resolve) => {
@@ -19,6 +28,117 @@ async function runCmd(cmd: string): Promise<{ success: boolean, output: string }
         });
     });
 }
+
+// --- الإضافة الجديدة: دالة مساعدة لاستخراج الكلمة الخاطئة من الرسالة وتحديد مكانها ---
+function getAccurateErrorRange(lineText: string, message: string, lineIndex: number): vscode.Range {
+    let targetWord = "";
+    
+    // محاولة استخراج الكلمة بين علامات التنصيص (غالبًا مع NASM)
+    const quoteMatch = message.match(/['`"]([^'`"]+)['`"]/);
+    if (quoteMatch) {
+        targetWord = quoteMatch[1];
+    } 
+    // محاولة استخراج الكلمة بعد النقطتين (غالبًا مع UASM مثل Error A2102: Symbol not defined : msg)
+    else if (message.includes(':')) {
+        const parts = message.split(':');
+        targetWord = parts[parts.length - 1].trim();
+    } 
+    
+    // تنظيف الكلمة المستخرجة
+    targetWord = targetWord.replace(/[\[\]]/g, '');
+
+    // إذا وجدنا الكلمة وكانت موجودة فعلاً في السطر، نضع الخط تحتها فقط
+    if (targetWord && lineText.includes(targetWord)) {
+        const startChar = lineText.indexOf(targetWord);
+        return new vscode.Range(lineIndex, startChar, lineIndex, startChar + targetWord.length);
+    }
+
+    // كخيار بديل إذا فشل الاستخراج، نضع الخط تحت أول كلمة في السطر بدلاً من السطر كاملاً
+    const trimmed = lineText.trimStart();
+    const startChar = lineText.length - trimmed.length;
+    const firstWordMatch = trimmed.match(/^\S+/);
+    const endChar = firstWordMatch ? startChar + firstWordMatch[0].length : lineText.length;
+    
+    return new vscode.Range(lineIndex, startChar, lineIndex, endChar);
+}
+
+// --- الإضافة الجديدة: دالة لتشغيل أمر التجميع في الخلفية وتحليل الأخطاء (Diagnostics) ---
+async function assembleAndDiagnose(assembleCmd: string, fileDir: string, document: vscode.TextDocument): Promise<boolean> {
+    return new Promise((resolve) => {
+        cp.exec(assembleCmd, { cwd: fileDir }, (error, stdout, stderr) => {
+            const output = (stdout || '') + '\n' + (stderr || '');
+            const diagnostics: vscode.Diagnostic[] = [];
+            const errorRanges: vscode.Range[] = []; // مصفوفة لحفظ أماكن الدوائر الحمراء
+
+            // Regex لاصطياد أخطاء NASM
+            const nasmRegex = /^(?:[^:]+):(\d+):\s+(error|warning|fatal):\s+(.*)$/gm;
+            
+            // Regex لاصطياد أخطاء UASM
+            const uasmRegex = /^(?:[^(]+)\((\d+)\)\s+:\s+(Error|Fatal|Warning)\s+(.*)$/gm;
+
+            let match;
+
+            // فحص أخطاء NASM
+            while ((match = nasmRegex.exec(output)) !== null) {
+                const line = parseInt(match[1], 10) - 1; 
+                const severityStr = match[2].toLowerCase();
+                const message = match[3];
+
+                const severity = severityStr.includes('warning') 
+                    ? vscode.DiagnosticSeverity.Warning 
+                    : vscode.DiagnosticSeverity.Error;
+
+                const safeLine = Math.max(0, Math.min(line, document.lineCount - 1));
+                const lineText = document.lineAt(safeLine).text;
+                const range = getAccurateErrorRange(lineText, message, safeLine);
+                
+                diagnostics.push(new vscode.Diagnostic(range, `NASM: ${message}`, severity));
+                errorRanges.push(range);
+            }
+
+            // فحص أخطاء UASM
+            while ((match = uasmRegex.exec(output)) !== null) {
+                const line = parseInt(match[1], 10) - 1;
+                const severityStr = match[2].toLowerCase();
+                const message = match[3];
+
+                const severity = severityStr.includes('warning') 
+                    ? vscode.DiagnosticSeverity.Warning 
+                    : vscode.DiagnosticSeverity.Error;
+
+                const safeLine = Math.max(0, Math.min(line, document.lineCount - 1));
+                const lineText = document.lineAt(safeLine).text;
+                const range = getAccurateErrorRange(lineText, message, safeLine);
+                
+                diagnostics.push(new vscode.Diagnostic(range, `UASM: ${message}`, severity));
+                errorRanges.push(range);
+            }
+
+            const editor = vscode.window.activeTextEditor;
+
+            if (diagnostics.length > 0) {
+                // عرض الأخطاء في المحرر (الخطوط الحمراء تحت الكلمة فقط)
+                diagnosticCollection.set(document.uri, diagnostics);
+                
+                // رسم الدوائر الحمراء في الهامش
+                if (editor && editor.document.uri.toString() === document.uri.toString()) {
+                    editor.setDecorations(errorGutterDecoration, errorRanges);
+                }
+
+                vscode.window.showErrorMessage(`ahmed-x86 ASM: Found ${diagnostics.length} issue(s). Check the red squiggles in your code! ❌`);
+                resolve(false); // توقف هنا، هناك خطأ في الكود
+            } else {
+                // مسح الأخطاء والدوائر القديمة إذا نجح التجميع
+                diagnosticCollection.clear();
+                if (editor) {
+                    editor.setDecorations(errorGutterDecoration, []);
+                }
+                resolve(true); // الكود سليم، أكمل العملية
+            }
+        });
+    });
+}
+// -----------------------------------------------------------------------------------
 
 // دالة فحص الحزم باستخدام واجهة الإشعارات التقدمية (Progress Notification)
 async function checkDependencies(platform: string) {
@@ -195,6 +315,10 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
 
 export function activate(context: vscode.ExtensionContext) {
     const currentPlatform = os.platform();
+
+    // --- الإضافة الجديدة: تهيئة مجموعة تشخيص الأخطاء ---
+    diagnosticCollection = vscode.languages.createDiagnosticCollection('ahmed_x86_asm');
+    context.subscriptions.push(diagnosticCollection);
 
     // فحص الحزم عند أول تشغيل للإضافة فقط
     const hasCheckedDeps = context.globalState.get<boolean>('hasCheckedDeps_v108');
@@ -384,28 +508,46 @@ export function activate(context: vscode.ExtensionContext) {
             // ----------------------------------------------------
         }
 
-        let terminal = vscode.window.activeTerminal;
-        if (!terminal || terminal.name !== "ahmed_x86_asm") {
-            terminal = vscode.window.createTerminal("ahmed_x86_asm");
-        }
-        
-        terminal.show();
-        terminal.sendText(`cd "${fileDir}"`);
-        
-        // ميزة تنظيف الطرفية التلقائي
-        terminal.sendText(platform === 'win32' ? 'cls' : 'clear');
-        
-        // إرسال الأوامر واحداً تلو الآخر للطرفية
-        for (const cmd of commands) {
-            terminal.sendText(cmd);
+        // --- الإضافة الجديدة: فحص الأخطاء قبل إرسال الأوامر للطرفية ---
+        if (commands.length > 0) {
+            const assembleCmd = commands[0];      // الأمر الأول هو دائماً nasm أو uasm
+            const restCommands = commands.slice(1); // باقي الأوامر (الربط والتشغيل)
+
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Window,
+                title: "Assembling...",
+            }, async () => {
+                const isSuccess = await assembleAndDiagnose(assembleCmd, fileDir, editor.document);
+
+                if (!isSuccess) {
+                    return; // توقف التنفيذ ولا تفتح الطرفية، دع المستخدم يرى الخطأ الأحمر
+                }
+
+                // الكود سليم، افتح الطرفية ونفذ باقي الأوامر
+                let terminal = vscode.window.activeTerminal;
+                if (!terminal || terminal.name !== "ahmed_x86_asm") {
+                    terminal = vscode.window.createTerminal("ahmed_x86_asm");
+                }
+                
+                terminal.show(true); // true لعدم سحب التركيز من الكود
+                terminal.sendText(`cd "${fileDir}"`);
+                
+                // تنظيف الطرفية
+                terminal.sendText(platform === 'win32' ? 'cls' : 'clear');
+                
+                // نرسل أوامر الـ Linker والتشغيل فقط، لأننا قمنا بالتجميع في الخلفية بالفعل
+                for (const cmd of restCommands) {
+                    terminal.sendText(cmd);
+                }
+            });
         }
     });
 
     // تسجيل الأوامر معاً
     context.subscriptions.push(checkDepsDisposable);
     context.subscriptions.push(resetPathDisposable);
-    context.subscriptions.push(resetLinkerDisposable); // <--- الإضافة الجديدة
-    context.subscriptions.push(setLinkerDisposable);   // <--- تم تسجيل أمر تغيير الـ Linker الجديد هنا
+    context.subscriptions.push(resetLinkerDisposable); 
+    context.subscriptions.push(setLinkerDisposable);   
     context.subscriptions.push(runDisposable);
 }
 

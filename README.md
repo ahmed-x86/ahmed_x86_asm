@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.1.5/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.1.6/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,7 +25,8 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 ## ✨ Features
 
-- **🔍 Inline Error Diagnostics (New in v1.1.5!)**: A built-in intelligent linter that runs the assembler (`nasm`/`uasm`) in the background. If there's a syntax error, it halts execution and highlights the exact line with a red squiggle directly in your code, keeping your terminal perfectly clean!
+- **🛑 Smart Background Build System (New in v1.1.6!)**: Both Assembling and Linking now happen silently in the background! If your code has linker errors (like a missing `main` function), execution is halted with a clean pop-up message. The terminal will **only** open if your code compiles and links 100% successfully, completely eliminating cascading errors and terminal clutter!
+- **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler (`nasm`/`uasm`) in the background. If there's a syntax error, it halts execution and highlights the exact word with a red squiggle and a custom gutter icon directly in your code.
 - **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords to instantly recommend the perfect build mode (see table below).
 - **🎛️ Manual Win32 Linker Override**: You now have full manual control to switch between `ld` and `gcc` linkers directly from the Command Palette, ensuring maximum stability across different Windows environments.
 - **🖥️ Sequential Terminal Execution**: Commands are sent sequentially to the terminal instead of a single giant chained command. This means a dramatically cleaner output, easier debugging, and a much smoother visual experience when compiling.
@@ -101,7 +102,7 @@ Ensure your system has an **MSYS2** environment set up with the following:
 3. Click the drop-down arrow next to the **Play (Run)** button in the top right corner.
 4. Select **Run x86 Assembly (ahmed_x86)**.
 5. Choose the **✨ Auto Detect** option (or manually select a build mode).
-6. Watch the magic happen. If you have syntax errors, check your code for the red squiggles; otherwise, enjoy your clean terminal output!
+6. Watch the magic happen. If you have errors, check your code for the red squiggles or the pop-up alerts; otherwise, enjoy your clean terminal output!
 
 ---
 

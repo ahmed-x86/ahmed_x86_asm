@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.1.6/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.1.7/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,7 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 ## ✨ Features
 
-- **🛑 Smart Background Build System (New in v1.1.6!)**: Both Assembling and Linking now happen silently in the background! If your code has linker errors (like a missing `main` function), execution is halted with a clean pop-up message. The terminal will **only** open if your code compiles and links 100% successfully, completely eliminating cascading errors and terminal clutter!
+- **📜 Transparent Build Logging & Error Prevention (New in v1.1.7!)**: See exactly what's happening under the hood! The extension logs every build command (`nasm`, `gcc`, `ld`) directly to the terminal for full transparency. If a compilation or linker error occurs, it smartly halts execution immediately to prevent messy cascading errors, letting you see the exact log without terminal spam!
 - **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler (`nasm`/`uasm`) in the background. If there's a syntax error, it halts execution and highlights the exact word with a red squiggle and a custom gutter icon directly in your code.
 - **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords to instantly recommend the perfect build mode (see table below).
 - **🎛️ Manual Win32 Linker Override**: You now have full manual control to switch between `ld` and `gcc` linkers directly from the Command Palette, ensuring maximum stability across different Windows environments.

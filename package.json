@@ -2,8 +2,8 @@
   "name": "ahmed-x86-asm",
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
-  "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
-  "version": "1.2.1",
+  "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux, Windows, and macOS (via Darling).",
+  "version": "1.2.2",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {
@@ -25,6 +25,9 @@
     "irvine",
     "linux",
     "windows",
+    "macos",
+    "macho",
+    "darling",
     "x86-64",
     "runner",
     "compiler",
@@ -39,8 +42,7 @@
     "x86_64",
     "32bit",
     "64bit",
-    "gdb",
-    "ahmed-x86 asm"
+    "gdb"
   ],
   "main": "./out/extension.js",
   "activationEvents": [

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.2.0/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.2.1/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,7 +25,8 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 ## ✨ Features
 
-- **🐧 Linux Linker Override (New in v1.2.0!)**: Full manual control to switch between `ld` (Standard, best for pure ASM) and `gcc` (Best for C-Library integration) directly from the Command Palette on Linux, maximizing flexibility!
+- **🧰 Unified Tools & Settings Menu (New in v1.2.1!)**: Declutter your workflow! We've added a dedicated "Info" icon (`i`) right next to the Play button. Clicking it opens a sleek, unified interactive menu giving you instant access to all extension settings, dependency checkers, and linker configurations in one convenient place!
+- **🐧 Linux Linker Override (Added in v1.2.0)**: Full manual control to switch between `ld` (Standard, best for pure ASM) and `gcc` (Best for C-Library integration) directly from the Command Palette on Linux, maximizing flexibility!
 - **🗑️ Auto-Cleanup Temporary Files (Added in v1.1.9)**: Keep your project folders clean! The extension can automatically delete temporary build files (`.obj`, `.o`, `.err`, `.lst`) after a successful run. Completely customizable via settings (`ahmed-x86-asm.cleanup.enabled` and `ahmed-x86-asm.cleanup.extensions`).
 - **💡 Smart Hover Logs (Added in v1.1.8)**: Say goodbye to opening separate `.err` files! Simply hover your mouse over the red error squiggles in your code, and an elegant pop-up will instantly display the complete compiler error log. Debugging Assembly has never been this seamless!
 - **📜 Transparent Build Logging & Error Prevention (Added in v1.1.7)**: See exactly what's happening under the hood! The extension logs every build command (`nasm`, `gcc`, `ld`) directly to the terminal for full transparency. If a compilation or linker error occurs, it smartly halts execution immediately to prevent messy cascading errors, letting you see the exact log without terminal spam!
@@ -47,13 +48,15 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 
 ## 🎛️ Extension Commands
-You can access these features at any time via the Command Palette (`Ctrl + Shift + P`):
+You can access these features at any time via the **new Tools & Settings button (ℹ️)** next to the Play button, or via the Command Palette (`Ctrl + Shift + P`):
+
+- `ahmed-x86 ASM: Settings & Tools`: **(New!)** Opens the unified interactive menu to manage all extension features below.
 - `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify all required compilers and linkers are installed.
 - `Reset Irvine Library Path`: Clears your saved Irvine directory so you can select a new one.
 - `Change Win32 Linker Method (ahmed_x86)`: Manually switch your Windows linker preference between `ld` and `gcc`.
 - `Reset Win32 Linker to Auto (ahmed_x86)`: Clears your automatically or manually adopted Windows linker preference.
-- `Change Linux Linker Method (ahmed_x86)`: **(New!)** Manually switch your Linux linker preference between `ld` and `gcc`.
-- `Reset Linux Linker to Default (ahmed_x86)`: **(New!)** Resets your Linux linker preference back to the standard `ld`.
+- `Change Linux Linker Method (ahmed_x86)`: Manually switch your Linux linker preference between `ld` and `gcc`.
+- `Reset Linux Linker to Default (ahmed_x86)`: Resets your Linux linker preference back to the standard `ld`.
 
 ---
 

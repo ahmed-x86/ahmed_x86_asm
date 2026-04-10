@@ -307,7 +307,7 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isFreeBSD = textLower.includes('freebsd') || textLower.includes('fbsd'); // تعرف تلقائي لـ FreeBSD
 
     if (platform === 'linux') {
-        if (isFreeBSD) return { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه
+        if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه مع التمييز بين main و _start
         if (isMac) return { index: 11, name: "Mac64 Native (Darling)" };
         if (hasIrvine) return hasMain ? { index: 8, name: "Win32 Irvine (main)" } : { index: 5, name: "Win32 Irvine" };
         if (is64Bit) return hasMain ? { index: 2, name: "Linux64 Native (main)" } : { index: 1, name: "Linux64 Native (_start)" };
@@ -470,7 +470,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "9) Win32 Standalone (main)",
                 "10) Win64 Standalone (main)",
                 "11) Mac64 Native (Darling)",
-                "12) FreeBSD 64-bit (_start) (QEMU)" 
+                "12) FreeBSD 64-bit (_start) (QEMU)",
+                "13) FreeBSD 64-bit (main) (QEMU)" 
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -520,6 +521,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `ld.lld -m elf_x86_64_fbsd "${baseName}.o" -o "${baseName}"`, 
                         `qemu-x86_64-static ./"${baseName}"`
                     ]; break;
+                    case 13: commands = [
+                        `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
+                        `ld.lld -m elf_x86_64_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
+                        `qemu-x86_64-static ./"${baseName}"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -542,6 +548,11 @@ export function activate(context: vscode.ExtensionContext) {
                     case 12: commands = [
                         `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
                         `ld.lld -m elf_x86_64_fbsd "${baseName}.o" -o "${baseName}"`, 
+                        `qemu-x86_64-static ./"${baseName}"`
+                    ]; break;
+                    case 13: commands = [
+                        `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
+                        `ld.lld -m elf_x86_64_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
                         `qemu-x86_64-static ./"${baseName}"`
                     ]; break;
                 }

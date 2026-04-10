@@ -3,7 +3,7 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
   "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {
@@ -51,6 +51,7 @@
     "onCommand:ahmed-x86-asm.setLinkerMethod",
     "onCommand:ahmed-x86-asm.setLinuxLinkerMethod",
     "onCommand:ahmed-x86-asm.resetLinuxLinkerMethod",
+    "onCommand:ahmed-x86-asm.showSettingsMenu",
     "onLanguage:assembly",
     "onLanguage:asm",
     "onLanguage:masm",
@@ -150,6 +151,11 @@
       {
         "command": "ahmed-x86-asm.resetLinuxLinkerMethod",
         "title": "Reset Linux Linker to Default (ahmed_x86)"
+      },
+      {
+        "command": "ahmed-x86-asm.showSettingsMenu",
+        "title": "ahmed-x86 ASM: Settings & Tools",
+        "icon": "$(info)"
       }
     ],
     "keybindings": [
@@ -165,6 +171,13 @@
         {
           "command": "ahmed-x86-asm.run",
           "group": "navigation@1",
+          "when": "resourceLangId == assembly || resourceExtname =~ /\\.(asm|s|S|inc|mac|nasm|masm|uasm)$/"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "ahmed-x86-asm.showSettingsMenu",
+          "group": "navigation@2",
           "when": "resourceLangId == assembly || resourceExtname =~ /\\.(asm|s|S|inc|mac|nasm|masm|uasm)$/"
         }
       ]

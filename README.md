@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.2.1/blue?style=flat-square" alt="Version">
-  <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows/cyan?style=flat-square" alt="Platform">
+  <img src="https://badgen.net/badge/Version/1.2.2/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
   </a>
@@ -20,29 +20,24 @@
   </a>
 </p>
 
-A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64 Assembly** code directly from your editor. Now supporting both **Linux** and **Windows** with a seamless workflow for native and cross-platform Assembly development.
+A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64 Assembly** code directly from your editor. Now supporting **Linux**, **Windows**, and **macOS (via Darling)** with a seamless cross-platform workflow for native and cross-platform Assembly development.
 
 ---
 ## ✨ Features
 
-- **🧰 Unified Tools & Settings Menu (New in v1.2.1!)**: Declutter your workflow! We've added a dedicated "Info" icon (`i`) right next to the Play button. Clicking it opens a sleek, unified interactive menu giving you instant access to all extension settings, dependency checkers, and linker configurations in one convenient place!
+- **🍎 macOS Cross-Compilation (New in v1.2.2!)**: Break the OS boundaries! You can now compile, link, and run macOS Mach-O 64-bit Assembly code directly from Linux. Utilizing `osxcross` for linking and `Darling` for execution, bringing Apple development to your Linux environment.
+- **🧰 Unified Tools & Settings Menu (Added in v1.2.1)**: Declutter your workflow! We've added a dedicated "Info" icon (`i`) right next to the Play button. Clicking it opens a sleek, unified interactive menu giving you instant access to all extension settings, dependency checkers, and linker configurations in one convenient place!
 - **🐧 Linux Linker Override (Added in v1.2.0)**: Full manual control to switch between `ld` (Standard, best for pure ASM) and `gcc` (Best for C-Library integration) directly from the Command Palette on Linux, maximizing flexibility!
-- **🗑️ Auto-Cleanup Temporary Files (Added in v1.1.9)**: Keep your project folders clean! The extension can automatically delete temporary build files (`.obj`, `.o`, `.err`, `.lst`) after a successful run. Completely customizable via settings (`ahmed-x86-asm.cleanup.enabled` and `ahmed-x86-asm.cleanup.extensions`).
-- **💡 Smart Hover Logs (Added in v1.1.8)**: Say goodbye to opening separate `.err` files! Simply hover your mouse over the red error squiggles in your code, and an elegant pop-up will instantly display the complete compiler error log. Debugging Assembly has never been this seamless!
-- **📜 Transparent Build Logging & Error Prevention (Added in v1.1.7)**: See exactly what's happening under the hood! The extension logs every build command (`nasm`, `gcc`, `ld`) directly to the terminal for full transparency. If a compilation or linker error occurs, it smartly halts execution immediately to prevent messy cascading errors, letting you see the exact log without terminal spam!
-- **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler (`nasm`/`uasm`) in the background. If there's a syntax error, it halts execution and highlights the exact word with a red squiggle and a custom gutter icon directly in your code.
-- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords to instantly recommend the perfect build mode (see table below).
-- **🎛️ Manual Win32 Linker Override**: You have full manual control to switch between `ld` and `gcc` linkers directly from the Command Palette, ensuring maximum stability across different Windows environments.
-- **🖥️ Sequential Terminal Execution**: Commands are sent sequentially to the terminal instead of a single giant chained command. This means a dramatically cleaner output, easier debugging, and a much smoother visual experience when compiling.
-- **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine) are installed via a sleek notification stack. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html) in your browser to help you get set up instantly.**
-- **🔗 Dynamic Linker Optimizer**: Automatically runs a silent background test to detect and adopt the most stable Windows linking method (`ld` vs `gcc`) for your specific OS (Windows 10/11), preventing compilation errors.
-- **📝 Quick Snippets**: Instantly generate full assembly boilerplate code using fast prefix keywords (see Snippets section).
-- **🧹 Auto-Clear Terminal**: Keeps your workspace clean by automatically clearing the terminal before every new run.
+- **🗑️ Auto-Cleanup Temporary Files (Added in v1.1.9)**: Keep your project folders clean! The extension can automatically delete temporary build files (`.obj`, `.o`, `.err`, `.lst`) after a successful run. Completely customizable via settings.
+- **💡 Smart Hover Logs (Added in v1.1.8)**: Say goodbye to opening separate `.err` files! Simply hover your mouse over the red error squiggles in your code, and an elegant pop-up will instantly display the complete compiler error log.
+- **📜 Transparent Build Logging & Error Prevention (Added in v1.1.7)**: See exactly what's happening under the hood! The extension logs every build command directly to the terminal for full transparency. 
+- **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler in the background, highlighting the exact word with a red squiggle and a custom gutter icon.
+- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `macho64`, `irvine32`, `elf64`) to instantly recommend the perfect build mode.
+- **🎛️ Manual Win32/Linux Linker Override**: Full manual control to switch between `ld` and `gcc` linkers to ensure maximum stability.
+- **🖥️ Sequential Terminal Execution**: Commands are sent sequentially to the terminal for a cleaner output and easier debugging.
+- **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine, darling) are installed. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html).**
 - **⚡ One-Click Execution**: Integrated directly into the editor's Run button menu.
-- **🧠 Dynamic Irvine Path**: Prompts you to select your Irvine library folder only once and saves it globally. (Includes a reset command if you move your folder).
-- **🐧 Linux Build Modes (10 Options)**: Includes Native 32/64-bit and cross-compiling Win32/Win64 via Wine.
-- **🪟 Windows Build Modes (6 Options)**: Includes Standard and Custom `main` configurations.
-- **⚙️ Multi-Assembler Support**: Smartly utilizes `NASM` for standalone builds and `UASM` for Irvine library projects.
+- **🧠 Dynamic Irvine Path**: Persistent path saver for the `Irvine32.inc` library.
 - **📁 Broad Compatibility**: Automatically detects a wide range of assembly extensions (`.asm`, `.s`, `.S`, `.inc`, `.nasm`, `.masm`, `.uasm`).
 
 ---
@@ -50,19 +45,21 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ## 🎛️ Extension Commands
 You can access these features at any time via the **new Tools & Settings button (ℹ️)** next to the Play button, or via the Command Palette (`Ctrl + Shift + P`):
 
-- `ahmed-x86 ASM: Settings & Tools`: **(New!)** Opens the unified interactive menu to manage all extension features below.
-- `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify all required compilers and linkers are installed.
-- `Reset Irvine Library Path`: Clears your saved Irvine directory so you can select a new one.
-- `Change Win32 Linker Method (ahmed_x86)`: Manually switch your Windows linker preference between `ld` and `gcc`.
-- `Reset Win32 Linker to Auto (ahmed_x86)`: Clears your automatically or manually adopted Windows linker preference.
-- `Change Linux Linker Method (ahmed_x86)`: Manually switch your Linux linker preference between `ld` and `gcc`.
-- `Reset Linux Linker to Default (ahmed_x86)`: Resets your Linux linker preference back to the standard `ld`.
+- `ahmed-x86 ASM: Settings & Tools`: Opens the unified interactive menu to manage all extension features.
+- `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify tools like `nasm`, `gcc`, `wine`, and `darling`.
+- `Reset Irvine Library Path`: Clears your saved Irvine directory path.
+- `Change Linux/Win32 Linker Method`: Manually switch between `ld` and `gcc`.
 
 ---
 
 ## 📝 Snippets & Templates
 
 Stop writing boilerplate from scratch! Type any of the following prefixes in an empty `.asm` file and press `Tab` or `Enter` to generate a complete template:
+
+### 🍎 macOS (Mach-O) Templates
+| Prefix | Description |
+| :--- | :--- |
+| `mac64-main` | **(New!)** macOS 64-bit boilerplate using Apple official `_main` and `libSystem` |
 
 ### 🐧 Linux Native Templates
 | Prefix | Description |
@@ -71,7 +68,6 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | `linux32-start` | Linux 32-bit boilerplate using `_start` |
 | `linux64-main` | Linux 64-bit boilerplate using `main` |
 | `linux64-start` / `arch-start` | Linux 64-bit boilerplate using `_start` (Prints *"i use Archlinux BTW"*) |
-
 
 ### 🪟 Windows API / Standalone Templates
 | Prefix | Description |
@@ -87,35 +83,27 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 
 ### 🐧 For Linux Users:
 Ensure your system has the following dependencies installed:
-- `nasm` *(For standard Linux/Windows builds)*
-- `uasm` *(For Irvine library support)*
-- `binutils` *(Provides `ld` for Linux linking)*
-- `mingw-w64-gcc` *(For linking Windows executables)*
-- `wine` *(To run compiled Windows `.exe` files seamlessly on Linux)*
+- `nasm`, `uasm`, `binutils` (ld), `mingw-w64-gcc`, `wine`.
+- **For macOS support:** `osxcross` (linker) and `darling` (runner).
 
 ### 🪟 For Windows Users:
-Ensure your system has an **MSYS2** environment set up with the following:
-- `MSYS2` installed at `C:\msys64`
-- `mingw-w64-x86_64-gcc` and `mingw-w64-i686-gcc` toolchains.
-- `nasm.exe` and `uasm.exe` placed in your MinGW bin directories (`C:\msys64\mingw64\bin`).
-
-*(Note: The extension will alert you if you attempt to run it on an unsupported OS like macOS).*
+Ensure your system has an **MSYS2** environment set up with:
+- `mingw-w64` toolchains and `nasm.exe` in your PATH.
 
 ---
 
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `arch-start`) and press `Tab` to instantly load a template.
-3. Click the drop-down arrow next to the **Play (Run)** button in the top right corner.
+2. Type a snippet prefix (e.g., `mac64-main`) and press `Tab`.
+3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run x86 Assembly (ahmed_x86)**.
-5. Choose the **✨ Auto Detect** option (or manually select a build mode).
-6. Watch the magic happen. If you have errors, check your code for the red squiggles, hover over them to see the log, or check the pop-up alerts; otherwise, enjoy your clean terminal output!
+5. Watch your code compile and run seamlessly!
 
 ---
 
 ## 🤝 Contributing & Feedback
-If you have suggestions, bug reports, or want to contribute to the codebase, feel free to open an issue or a pull request on the [GitHub Repository](https://github.com/ahmed-x86/ahmed_x86_asm).
+Feel free to open an issue or a pull request on the [GitHub Repository](https://github.com/ahmed-x86/ahmed_x86_asm).
 
 > **⭐ Notice:** If you find this extension useful, please consider leaving a 5-star rating on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ahmed-x86.ahmed-x86-asm)!
 

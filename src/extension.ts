@@ -158,7 +158,9 @@ async function checkDependencies(platform: string) {
                 { name: 'binutils', cmd: 'ld -v' },
                 { name: 'wine', cmd: 'wine --version' },
                 { name: 'uasm', cmd: 'uasm -h' },
-                { name: 'darling', cmd: 'darling --version' } // فحص دارلينج
+                { name: 'darling', cmd: 'darling --version' }, // فحص دارلينج
+                { name: 'lld', cmd: 'ld.lld -v' }, // فحص LLVM Linker (لـ FreeBSD)
+                { name: 'qemu-user-static', cmd: 'qemu-x86_64-static --version' } // فحص المحاكي (لـ FreeBSD)
             ];
 
             const total = deps.length;
@@ -301,10 +303,12 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const hasIrvine = textLower.includes('irvine32.inc');
     const hasMain = textLower.includes('main proc') || textLower.includes('main:');
     const is64Bit = textLower.includes('bits 64') || textLower.includes('elf64') || textLower.includes('win64') || textLower.includes('rax');
-    const isMac = textLower.includes('macho64'); // تعرف تلقائي للماك
+    const isMac = textLower.includes('macho64');
+    const isFreeBSD = textLower.includes('freebsd') || textLower.includes('fbsd'); // تعرف تلقائي لـ FreeBSD
 
     if (platform === 'linux') {
-        if (isMac) return { index: 11, name: "Mac64 Native (Darling)" }; // أولوية الماك
+        if (isFreeBSD) return { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه
+        if (isMac) return { index: 11, name: "Mac64 Native (Darling)" };
         if (hasIrvine) return hasMain ? { index: 8, name: "Win32 Irvine (main)" } : { index: 5, name: "Win32 Irvine" };
         if (is64Bit) return hasMain ? { index: 2, name: "Linux64 Native (main)" } : { index: 1, name: "Linux64 Native (_start)" };
         return hasMain ? { index: 4, name: "Linux32 Native (main)" } : { index: 3, name: "Linux32 Native (_start)" };
@@ -465,7 +469,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "8) Win32 Irvine (main)",
                 "9) Win32 Standalone (main)",
                 "10) Win64 Standalone (main)",
-                "11) Mac64 Native (Darling)" // الخيار الجديد
+                "11) Mac64 Native (Darling)",
+                "12) FreeBSD 64-bit (_start) (QEMU)" 
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -510,6 +515,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, 
                         `darling shell ./"${baseName}"`
                     ]; break;
+                    case 12: commands = [
+                        `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
+                        `ld.lld -m elf_x86_64_fbsd "${baseName}.o" -o "${baseName}"`, 
+                        `qemu-x86_64-static ./"${baseName}"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -528,6 +538,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `nasm -f macho64 "${fileName}" -o "${baseName}.o"`, 
                         `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, 
                         `darling shell ./"${baseName}"`
+                    ]; break;
+                    case 12: commands = [
+                        `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
+                        `ld.lld -m elf_x86_64_fbsd "${baseName}.o" -o "${baseName}"`, 
+                        `qemu-x86_64-static ./"${baseName}"`
                     ]; break;
                 }
             }

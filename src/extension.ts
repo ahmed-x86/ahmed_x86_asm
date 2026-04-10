@@ -184,7 +184,9 @@ async function checkDependencies(platform: string) {
                 { name: 'qemu-user-static', cmd: 'qemu-x86_64-static --version' }, // فحص المحاكي (لـ FreeBSD)
                 { name: 'aarch64-as', cmd: 'aarch64-linux-gnu-as --version' }, // إضافة فحص ARM64
                 { name: 'aarch64-ld', cmd: 'aarch64-linux-gnu-ld -v' }, // إضافة فحص ARM64
-                { name: 'qemu-aarch64-static', cmd: 'qemu-aarch64-static --version' } // إضافة فحص ARM64
+                { name: 'qemu-aarch64-static', cmd: 'qemu-aarch64-static --version' }, // إضافة فحص ARM64
+                { name: 'arm-none-eabi-as', cmd: 'arm-none-eabi-as --version' }, // إضافة فحص ARM32
+                { name: 'qemu-arm-static', cmd: 'qemu-arm-static --version' } // إضافة فحص ARM32
             ];
 
             const total = deps.length;
@@ -329,10 +331,12 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const is64Bit = textLower.includes('bits 64') || textLower.includes('elf64') || textLower.includes('win64') || textLower.includes('rax');
     const isMac = textLower.includes('macho64');
     const isFreeBSD = textLower.includes('freebsd') || textLower.includes('fbsd'); // تعرف تلقائي لـ FreeBSD
-    const isArm64 = textLower.includes('aarch64') || textLower.includes('svc #0'); // إضافة لـ ARM64
+    const isArm64 = textLower.includes('aarch64') || textLower.includes('x8'); // إضافة لـ ARM64
+    const isArm32 = textLower.includes('r7') || textLower.includes('svc #0'); // إضافة لـ ARM32
 
     if (platform === 'linux') {
         if (isArm64) return { index: 14, name: "Linux ARM64 (_start)" }; // إضافة ARM64
+        if (isArm32) return { index: 15, name: "Linux ARM32 (_start)" }; // إضافة ARM32
         if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه مع التمييز بين main و _start
         if (isMac) return { index: 11, name: "Mac64 Native (Darling)" };
         if (hasIrvine) return hasMain ? { index: 8, name: "Win32 Irvine (main)" } : { index: 5, name: "Win32 Irvine" };
@@ -498,7 +502,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "11) Mac64 Native (Darling)",
                 "12) FreeBSD 64-bit (_start) (QEMU)",
                 "13) FreeBSD 64-bit (main) (QEMU)",
-                "14) Linux ARM64 (_start) (QEMU)" // الإضافة الجديدة لـ ARM64
+                "14) Linux ARM64 (_start) (QEMU)", 
+                "15) Linux ARM32 (_start) (QEMU)" // الإضافة الجديدة لـ ARM32
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -558,6 +563,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, 
                         `qemu-aarch64-static ./"${baseName}"`
                     ]; break;
+                    case 15: commands = [
+                        `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
+                        `arm-none-eabi-ld "${baseName}.o" -o "${baseName}"`, 
+                        `qemu-arm-static ./"${baseName}"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -591,6 +601,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
                         `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, 
                         `qemu-aarch64-static ./"${baseName}"`
+                    ]; break;
+                    case 15: commands = [
+                        `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
+                        `arm-none-eabi-ld "${baseName}.o" -o "${baseName}"`, 
+                        `qemu-arm-static ./"${baseName}"`
                     ]; break;
                 }
             }

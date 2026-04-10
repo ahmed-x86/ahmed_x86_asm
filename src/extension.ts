@@ -313,6 +313,30 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     }
 }
 
+// --- الإضافة الجديدة (v1.1.9): دالة لتنظيف الملفات المؤقتة ---
+async function cleanUpTempFiles(fileDir: string, baseName: string) {
+    // قراءة الإعدادات الخاصة بالإضافة
+    const config = vscode.workspace.getConfiguration('ahmed-x86-asm.cleanup');
+    const isEnabled = config.get<boolean>('enabled', false);
+    const extensionsToClean = config.get<string[]>('extensions', ['.obj', '.o', '.err', '.lst']);
+
+    // إذا كانت الميزة معطلة، اخرج من الدالة
+    if (!isEnabled) return;
+
+    // المرور على الامتدادات ومحاولة حذف الملفات إن وجدت
+    for (const ext of extensionsToClean) {
+        const targetFile = path.join(fileDir, `${baseName}${ext}`);
+        if (fs.existsSync(targetFile)) {
+            try {
+                fs.unlinkSync(targetFile);
+            } catch (err) {
+                console.error(`ahmed-x86 ASM: Could not delete ${targetFile}`, err);
+            }
+        }
+    }
+}
+// --------------------------------------------------------------------------
+
 export function activate(context: vscode.ExtensionContext) {
     const currentPlatform = os.platform();
 
@@ -554,19 +578,20 @@ export function activate(context: vscode.ExtensionContext) {
                             }
                         });
                     });
-
-                    // إرسال أمر الربط للطرفية ليراه المستخدم
                     terminal.sendText(linkCmd);
 
                     if (!isLinkSuccess) {
-                        return; // توقف التنفيذ لمنع الأخطاء المتسلسلة
+                        return; 
                     }
                 }
-
-                // 3. كل شيء سليم، تنفيذ أوامر التشغيل
                 for (const cmd of runCommands) {
                     terminal.sendText(cmd);
                 }
+
+                setTimeout(async () => {
+                    await cleanUpTempFiles(fileDir, baseName);
+                }, 1000); 
+
             });
         }
     });

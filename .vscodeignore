@@ -12,3 +12,4 @@ vsc-extension-quickstart.md
 node_modules/**
 *.vsix
 venv/**
+for_run_mac_code.md

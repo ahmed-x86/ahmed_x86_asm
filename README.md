@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.2.6/blue?style=flat-square" alt="Version">
-  <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32/cyan?style=flat-square" alt="Platform">
+  <img src="https://badgen.net/badge/Version/1.2.7/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
   </a>
@@ -20,12 +20,13 @@
   </a>
 </p>
 
-A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64, ARM64 & ARM32 Assembly** code directly from your editor. Now supporting **Linux**, **Windows**, **macOS (via Darling)**, and **FreeBSD (via QEMU)** with a seamless cross-platform workflow for native and cross-platform Assembly development.
+A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64, ARM64, ARM32, MIPS & FASM Assembly** code directly from your editor. Now supporting **Linux**, **Windows**, **macOS (via Darling)**, and **FreeBSD (via QEMU)** with a seamless cross-platform workflow for native and cross-platform Assembly development.
 
 ---
 
 ## ✨ Features
 
+- **🚀 Universal Assembly Mode Support (New in v1.2.7!)**: Total freedom! The extension now supports and detects almost every Assembly flavor, including **MASM (case-insensitive)**, **FASM**, **MIPS**, **UASM**, and **RISC-V**. Even if you manually change the language mode in the status bar or use other ASM extensions, the "Run" and "Info" buttons will stay active and ready to work.
 - **🦾 Linux ARM32 Support (New in v1.2.6!)**: The legacy lives on! You can now write and run **ARM32 (AArch32)** Assembly directly on your Linux machine. Utilizing `arm-none-eabi-as` for assembling and `qemu-arm-static` for execution, perfect for learning embedded systems and mobile architecture.
 - **🦾 Linux ARM64 Support (New in v1.2.5!)**: Expand your horizons! You can now write, compile, and run **ARM64 (AArch64)** Assembly code directly on your x86_64 Linux machine. Utilizing `aarch64-linux-gnu-as` for assembling and `qemu-aarch64-static` for execution, bringing mobile and server-grade architecture development to your desktop.
 - **⚓ FreeBSD Cross-Compilation (Enhanced in v1.2.4!)**: The BSD Gateway is open! You can now compile and run FreeBSD 64-bit Assembly code directly on Linux using both standard `_start` and C-style `main` entry points. Utilizing `ld.lld` (LLVM Linker) for linking and `qemu-x86_64-static` for execution, bringing BSD development to your Linux environment seamlessly.
@@ -42,7 +43,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 - **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine, darling, lld, qemu, aarch64-linux-gnu-binutils, arm-none-eabi-binutils) are installed. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html).**
 - **⚡ One-Click Execution**: Integrated directly into the editor's Run button menu.
 - **🧠 Dynamic Irvine Path**: Persistent path saver for the `Irvine32.inc` library.
-- **📁 Broad Compatibility**: Automatically detects a wide range of assembly extensions (`.asm`, `.s`, `.S`, `.inc`, `.nasm`, `.masm`, `.uasm`).
+- **📁 Broad Compatibility**: Automatically detects a wide range of assembly extensions (`.asm`, `.s`, `.S`, `.inc`, `.nasm`, `.masm`, `.uasm`, `.fasm`, `.mips`).
 
 ---
 
@@ -116,7 +117,7 @@ Ensure your system has an **MSYS2** environment set up with:
 1. Open any Assembly file in VSCodium / VS Code.
 2. Type a snippet prefix (e.g., `linux-arm32-start`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
-4. Select **Run x86 Assembly (ahmed_x86)**.
+4. Select **Run Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!
 
 ---

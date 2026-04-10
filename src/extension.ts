@@ -674,15 +674,43 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
+    // --- الإضافة الجديدة للتحديث 1.2.1: قائمة الإعدادات والأدوات المجمعة ---
+    let showSettingsMenuDisposable = vscode.commands.registerCommand('ahmed-x86-asm.showSettingsMenu', async () => {
+        const options = [
+            { label: '$(settings-gear) Open Extension Settings', description: 'Configure extension features (e.g., auto-cleanup)', command: 'settings' },
+            { label: '$(package) Check Dependencies', description: 'Verify required ASM tools and packages', command: 'ahmed-x86-asm.checkDeps' },
+            { label: '$(folder-opened) Reset Irvine Path', description: 'Clear the saved Irvine32 directory path', command: 'ahmed-x86-asm.resetIrvinePath' },
+            { label: '$(wrench) Set Win32 Linker Method', description: 'Choose between ld or gcc for Windows linking', command: 'ahmed-x86-asm.setLinkerMethod' },
+            { label: '$(refresh) Reset Win32 Linker Method', description: 'Let the extension auto-detect the Windows linker', command: 'ahmed-x86-asm.resetLinkerMethod' },
+            { label: '$(wrench) Set Linux Linker Method', description: 'Choose between ld or gcc for Linux linking', command: 'ahmed-x86-asm.setLinuxLinkerMethod' },
+            { label: '$(refresh) Reset Linux Linker Method', description: 'Restore the default Linux linker (ld)', command: 'ahmed-x86-asm.resetLinuxLinkerMethod' }
+        ];
+
+        const selection = await vscode.window.showQuickPick(options, {
+            placeHolder: 'ahmed-x86 ASM: Tools & Settings ⚙️'
+        });
+
+        if (selection) {
+            if (selection.command === 'settings') {
+                // فتح إعدادات الإضافة مباشرة في محرر VS Code
+                vscode.commands.executeCommand('workbench.action.openSettings', 'ahmed-x86-asm');
+            } else {
+                // تشغيل الأمر الذي تم اختياره من القائمة
+                vscode.commands.executeCommand(selection.command);
+            }
+        }
+    });
+
     // تسجيل الأوامر معاً
     context.subscriptions.push(checkDepsDisposable);
     context.subscriptions.push(resetPathDisposable);
     context.subscriptions.push(resetLinkerDisposable); 
     context.subscriptions.push(setLinkerDisposable);   
-    context.subscriptions.push(resetLinuxLinkerDisposable); // <--- تم تسجيل الأمر الجديد للينكس
-    context.subscriptions.push(setLinuxLinkerDisposable);   // <--- تم تسجيل الأمر الجديد للينكس
+    context.subscriptions.push(resetLinuxLinkerDisposable); 
+    context.subscriptions.push(setLinuxLinkerDisposable);   
     context.subscriptions.push(runDisposable);
     context.subscriptions.push(hoverDisposable); 
+    context.subscriptions.push(showSettingsMenuDisposable); // <--- تم تسجيل الأمر الجديد هنا
 }
 
 export function deactivate() {}

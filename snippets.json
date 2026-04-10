@@ -269,4 +269,32 @@
     ],
     "description": "Win64 Standalone template using _start"
   }
+  "macOS 64-bit (main)": {
+    "prefix": "mac64-main",
+    "body": [
+      "default rel",
+      "",
+      "global _main",
+      "extern _write",
+      "",
+      "section .data",
+      "\tmsg db \"Hello macOS 64-bit from Arch Linux! (The Apple Way)\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "_main:",
+      "\t; Stack Alignment (16-byte boundary)",
+      "\tsub rsp, 8",
+      "",
+      "\tmov rdi, 1          ; fd = 1 (stdout)",
+      "\tlea rsi, [msg]      ; load effective address (rel)",
+      "\tmov rdx, len        ; length",
+      "\tcall _write         ; Apple System Call",
+      "",
+      "\tadd rsp, 8          ; restore stack",
+      "\txor rax, rax        ; return 0",
+      "\tret"
+    ],
+    "description": "Template for macOS 64-bit using main (Apple official method)"
+  }
 }

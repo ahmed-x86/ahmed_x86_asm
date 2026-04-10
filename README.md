@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.2.5/blue?style=flat-square" alt="Version">
-  <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64/cyan?style=flat-square" alt="Platform">
+  <img src="https://badgen.net/badge/Version/1.2.6/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
   </a>
@@ -20,11 +20,13 @@
   </a>
 </p>
 
-A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64 & ARM64 Assembly** code directly from your editor. Now supporting **Linux**, **Windows**, **macOS (via Darling)**, and **FreeBSD (via QEMU)** with a seamless cross-platform workflow for native and cross-platform Assembly development.
+A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64, ARM64 & ARM32 Assembly** code directly from your editor. Now supporting **Linux**, **Windows**, **macOS (via Darling)**, and **FreeBSD (via QEMU)** with a seamless cross-platform workflow for native and cross-platform Assembly development.
 
 ---
+
 ## ✨ Features
 
+- **🦾 Linux ARM32 Support (New in v1.2.6!)**: The legacy lives on! You can now write and run **ARM32 (AArch32)** Assembly directly on your Linux machine. Utilizing `arm-none-eabi-as` for assembling and `qemu-arm-static` for execution, perfect for learning embedded systems and mobile architecture.
 - **🦾 Linux ARM64 Support (New in v1.2.5!)**: Expand your horizons! You can now write, compile, and run **ARM64 (AArch64)** Assembly code directly on your x86_64 Linux machine. Utilizing `aarch64-linux-gnu-as` for assembling and `qemu-aarch64-static` for execution, bringing mobile and server-grade architecture development to your desktop.
 - **⚓ FreeBSD Cross-Compilation (Enhanced in v1.2.4!)**: The BSD Gateway is open! You can now compile and run FreeBSD 64-bit Assembly code directly on Linux using both standard `_start` and C-style `main` entry points. Utilizing `ld.lld` (LLVM Linker) for linking and `qemu-x86_64-static` for execution, bringing BSD development to your Linux environment seamlessly.
 - **🍎 macOS Cross-Compilation (Added in v1.2.2)**: Break the OS boundaries! You can now compile, link, and run macOS Mach-O 64-bit Assembly code directly from Linux. Utilizing `osxcross` for linking and `Darling` for execution, bringing Apple development to your Linux environment.
@@ -37,7 +39,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 - **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `svc #0`, `freebsd`, `macho64`, `irvine32`, `elf64`) to instantly recommend the perfect build mode.
 - **🎛️ Manual Win32/Linux Linker Override**: Full manual control to switch between `ld` and `gcc` linkers to ensure maximum stability.
 - **🖥️ Sequential Terminal Execution**: Commands are sent sequentially to the terminal for a cleaner output and easier debugging.
-- **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine, darling, lld, qemu, aarch64-linux-gnu-binutils) are installed. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html).**
+- **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine, darling, lld, qemu, aarch64-linux-gnu-binutils, arm-none-eabi-binutils) are installed. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html).**
 - **⚡ One-Click Execution**: Integrated directly into the editor's Run button menu.
 - **🧠 Dynamic Irvine Path**: Persistent path saver for the `Irvine32.inc` library.
 - **📁 Broad Compatibility**: Automatically detects a wide range of assembly extensions (`.asm`, `.s`, `.S`, `.inc`, `.nasm`, `.masm`, `.uasm`).
@@ -48,7 +50,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 You can access these features at any time via the **new Tools & Settings button (ℹ️)** next to the Play button, or via the Command Palette (`Ctrl + Shift + P`):
 
 - `ahmed-x86 ASM: Settings & Tools`: Opens the unified interactive menu to manage all extension features.
-- `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify tools like `nasm`, `gcc`, `wine`, `darling`, `lld`, and `aarch64-linux-gnu-as`.
+- `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify tools like `nasm`, `gcc`, `wine`, `darling`, `lld`, `aarch64-linux-gnu-as`, and `arm-none-eabi-as`.
 - `Reset Irvine Library Path`: Clears your saved Irvine directory path.
 - `Change Linux/Win32 Linker Method`: Manually switch between `ld` and `gcc`.
 
@@ -58,10 +60,11 @@ You can access these features at any time via the **new Tools & Settings button 
 
 Stop writing boilerplate from scratch! Type any of the following prefixes in an empty `.asm` file and press `Tab` or `Enter` to generate a complete template:
 
-### 🦾 ARM64 Templates
+### 🦾 ARM Templates
 | Prefix | Description |
 | :--- | :--- |
-| `linux-arm64-start` | **(New in v1.2.5!)** Linux ARM64 (AArch64) boilerplate using GNU Assembler (GAS) |
+| `linux-arm32-start` | **(New in v1.2.6!)** Linux ARM32 (AArch32) boilerplate using GNU Assembler (GAS) |
+| `linux-arm64-start` | Linux ARM64 (AArch64) boilerplate using GNU Assembler (GAS) |
 
 ### FreeBSD Templates
 | Prefix | Description |
@@ -100,6 +103,7 @@ Ensure your system has the following dependencies installed:
 - **For macOS support:** `osxcross` (linker) and `darling` (runner).
 - **For FreeBSD support:** `lld` (linker) and `qemu-user-static` (runner).
 - **For ARM64 support:** `aarch64-linux-gnu-binutils` and `qemu-aarch64-static`.
+- **For ARM32 support:** `arm-none-eabi-binutils` and `qemu-arm-static`.
 
 ### 🪟 For Windows Users:
 Ensure your system has an **MSYS2** environment set up with:
@@ -110,7 +114,7 @@ Ensure your system has an **MSYS2** environment set up with:
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `linux-arm64-start`) and press `Tab`.
+2. Type a snippet prefix (e.g., `linux-arm32-start`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run x86 Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!

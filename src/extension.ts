@@ -392,6 +392,31 @@ export function activate(context: vscode.ExtensionContext) {
     });
     // ----------------------------------------------------
 
+    // --- الإضافة الجديدة: أوامر التحكم في الـ Linker للينكس ---
+    let resetLinuxLinkerDisposable = vscode.commands.registerCommand('ahmed-x86-asm.resetLinuxLinkerMethod', async () => {
+        await context.globalState.update('linuxLinkerMethod', undefined);
+        vscode.window.showInformationMessage('Linux Linker method has been reset to default (ld).');
+    });
+
+    let setLinuxLinkerDisposable = vscode.commands.registerCommand('ahmed-x86-asm.setLinuxLinkerMethod', async () => {
+        const currentMethod = context.globalState.get<string>('linuxLinkerMethod') || 'ld';
+        
+        const options = [
+            { label: 'ld', description: 'Use GNU Linker (Standard, best for pure ASM)' },
+            { label: 'gcc', description: 'Use GCC (Best for C-Library integration)' }
+        ];
+
+        const selection = await vscode.window.showQuickPick(options, {
+            placeHolder: `Select Linux Linker Method | Current: ${currentMethod}`
+        });
+
+        if (selection) {
+            await context.globalState.update('linuxLinkerMethod', selection.label);
+            vscode.window.showInformationMessage(`Linux Linker method successfully set to: ${selection.label.toUpperCase()} ✅`);
+        }
+    });
+    // ----------------------------------------------------
+
     // أمر التشغيل الرئيسي
     let runDisposable = vscode.commands.registerCommand('ahmed-x86-asm.run', async () => {
         
@@ -460,19 +485,39 @@ export function activate(context: vscode.ExtensionContext) {
                 irvinePath = pathResult;
             }
 
-            // أوامر لينكس المقسمة
-            switch (selectedIndex) {
-                case 1: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
-                case 2: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld -e main "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
-                case 3: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld -m elf_i386 "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
-                case 4: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld -m elf_i386 -e main "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
-                case 5: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                case 6: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                case 7: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+            // --- الإضافة الجديدة: فحص خيار الـ Linker الخاص بلينكس ---
+            const linuxLinkerMethod = context.globalState.get<string>('linuxLinkerMethod') || 'ld';
+
+            if (linuxLinkerMethod === 'gcc') {
+                // أوامر لينكس المقسمة (باستخدام gcc كـ Linker)
+                switch (selectedIndex) {
+                    case 1: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `gcc "${baseName}.o" -o "${baseName}" -nostdlib`, `./"${baseName}"`]; break;
+                    case 2: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `gcc "${baseName}.o" -o "${baseName}" -no-pie`, `./"${baseName}"`]; break;
+                    case 3: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `gcc -m32 "${baseName}.o" -o "${baseName}" -nostdlib`, `./"${baseName}"`]; break;
+                    case 4: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `gcc -m32 "${baseName}.o" -o "${baseName}" -no-pie`, `./"${baseName}"`]; break;
+                    case 5: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 6: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 7: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                }
+            } else {
+                // أوامر لينكس المقسمة (باستخدام ld القياسي)
+                switch (selectedIndex) {
+                    case 1: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
+                    case 2: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld -e main "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
+                    case 3: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld -m elf_i386 "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
+                    case 4: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld -m elf_i386 -e main "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
+                    case 5: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 6: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 7: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                }
             }
+            // ----------------------------------------------------
         } else if (platform === 'win32') {
             options = [
                 `✨ Auto Detect: ${autoDetected.name}`,
@@ -634,8 +679,10 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(resetPathDisposable);
     context.subscriptions.push(resetLinkerDisposable); 
     context.subscriptions.push(setLinkerDisposable);   
+    context.subscriptions.push(resetLinuxLinkerDisposable); // <--- تم تسجيل الأمر الجديد للينكس
+    context.subscriptions.push(setLinuxLinkerDisposable);   // <--- تم تسجيل الأمر الجديد للينكس
     context.subscriptions.push(runDisposable);
-    context.subscriptions.push(hoverDisposable); // <--- تم تسجيل حدث وقوف الماوس هنا
+    context.subscriptions.push(hoverDisposable); 
 }
 
 export function deactivate() {}

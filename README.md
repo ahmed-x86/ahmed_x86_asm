@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.2.3/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.2.4/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,7 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 ## ✨ Features
 
-- ** FreeBSD Cross-Compilation (New in v1.2.3!)**: The BSD Gateway is open! You can now compile and run FreeBSD 64-bit Assembly code directly on Linux. Utilizing `lld` (LLVM Linker) for linking and `QEMU` for execution, bringing BSD development to your Linux environment.
+- ** FreeBSD Cross-Compilation (Enhanced in v1.2.4!)**: The BSD Gateway is open! You can now compile and run FreeBSD 64-bit Assembly code directly on Linux using both standard `_start` and C-style `main` entry points. Utilizing `ld.lld` (LLVM Linker) for linking and `qemu-x86_64-static` for execution, bringing BSD development to your Linux environment seamlessly.
 - **🍎 macOS Cross-Compilation (Added in v1.2.2)**: Break the OS boundaries! You can now compile, link, and run macOS Mach-O 64-bit Assembly code directly from Linux. Utilizing `osxcross` for linking and `Darling` for execution, bringing Apple development to your Linux environment.
 - **🧰 Unified Tools & Settings Menu (Added in v1.2.1)**: Declutter your workflow! We've added a dedicated "Info" icon (`i`) right next to the Play button. Clicking it opens a sleek, unified interactive menu giving you instant access to all extension settings, dependency checkers, and linker configurations in one convenient place!
 - **🐧 Linux Linker Override (Added in v1.2.0)**: Full manual control to switch between `ld` (Standard, best for pure ASM) and `gcc` (Best for C-Library integration) directly from the Command Palette on Linux, maximizing flexibility!
@@ -57,10 +57,11 @@ You can access these features at any time via the **new Tools & Settings button 
 
 Stop writing boilerplate from scratch! Type any of the following prefixes in an empty `.asm` file and press `Tab` or `Enter` to generate a complete template:
 
-###  FreeBSD Templates
+### FreeBSD Templates
 | Prefix | Description |
 | :--- | :--- |
-| `freebsd64-start` | **(New!)** FreeBSD 64-bit boilerplate using Raw Syscalls and `_start` |
+| `freebsd64-start` | FreeBSD 64-bit boilerplate using Raw Syscalls and `_start` |
+| `freebsd64-main` | **(New in v1.2.4!)** FreeBSD 64-bit boilerplate using `main` |
 
 ### 🍎 macOS (Mach-O) Templates
 | Prefix | Description |
@@ -102,7 +103,7 @@ Ensure your system has an **MSYS2** environment set up with:
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `mac64-main`) and press `Tab`.
+2. Type a snippet prefix (e.g., `freebsd64-main`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run x86 Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.1.8/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.1.9/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,6 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 ## ✨ Features
 
+- **🗑️ Auto-Cleanup Temporary Files (New in v1.1.9!)**: Keep your project folders clean! The extension can now automatically delete temporary build files (`.obj`, `.o`, `.err`, `.lst`) after a successful run. Completely customizable via settings (`ahmed-x86-asm.cleanup.enabled` and `ahmed-x86-asm.cleanup.extensions`).
 - **💡 Smart Hover Logs (New in v1.1.8!)**: Say goodbye to opening separate `.err` files! Simply hover your mouse over the red error squiggles in your code, and an elegant pop-up will instantly display the complete compiler error log. Debugging Assembly has never been this seamless!
 - **📜 Transparent Build Logging & Error Prevention (Added in v1.1.7)**: See exactly what's happening under the hood! The extension logs every build command (`nasm`, `gcc`, `ld`) directly to the terminal for full transparency. If a compilation or linker error occurs, it smartly halts execution immediately to prevent messy cascading errors, letting you see the exact log without terminal spam!
 - **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler (`nasm`/`uasm`) in the background. If there's a syntax error, it halts execution and highlights the exact word with a red squiggle and a custom gutter icon directly in your code.

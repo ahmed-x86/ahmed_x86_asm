@@ -348,5 +348,30 @@
       "\tsyscall"
     ],
     "description": "Template for FreeBSD 64-bit using main"
+  },
+  "Linux ARM64 (_start)": {
+    "prefix": "linux-arm64-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from ARM64 Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\t/* sys_write (x8 = 64) */",
+      "\tmov x8, #64         // syscall for write",
+      "\tmov x0, #1          // stdout",
+      "\tldr x1, =msg        // message address",
+      "\tldr x2, =len        // message length",
+      "\tsvc #0              // Supervisor Call",
+      "",
+      "\t/* sys_exit (x8 = 93) */",
+      "\tmov x8, #93         // syscall for exit",
+      "\tmov x0, #0          // exit status 0",
+      "\tsvc #0"
+    ],
+    "description": "Template for Linux ARM64 using _start (GNU Assembler)"
   }
 }

@@ -1,0 +1,1 @@
+sudo pacman -S aarch64-linux-gnu-binutils

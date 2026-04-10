@@ -157,7 +157,8 @@ async function checkDependencies(platform: string) {
                 { name: 'nasm', cmd: 'nasm -v' },
                 { name: 'binutils', cmd: 'ld -v' },
                 { name: 'wine', cmd: 'wine --version' },
-                { name: 'uasm', cmd: 'uasm -h' }
+                { name: 'uasm', cmd: 'uasm -h' },
+                { name: 'darling', cmd: 'darling --version' } // فحص دارلينج
             ];
 
             const total = deps.length;
@@ -300,8 +301,10 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const hasIrvine = textLower.includes('irvine32.inc');
     const hasMain = textLower.includes('main proc') || textLower.includes('main:');
     const is64Bit = textLower.includes('bits 64') || textLower.includes('elf64') || textLower.includes('win64') || textLower.includes('rax');
+    const isMac = textLower.includes('macho64'); // تعرف تلقائي للماك
 
     if (platform === 'linux') {
+        if (isMac) return { index: 11, name: "Mac64 Native (Darling)" }; // أولوية الماك
         if (hasIrvine) return hasMain ? { index: 8, name: "Win32 Irvine (main)" } : { index: 5, name: "Win32 Irvine" };
         if (is64Bit) return hasMain ? { index: 2, name: "Linux64 Native (main)" } : { index: 1, name: "Linux64 Native (_start)" };
         return hasMain ? { index: 4, name: "Linux32 Native (main)" } : { index: 3, name: "Linux32 Native (_start)" };
@@ -461,7 +464,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "7) Win64 Standalone",
                 "8) Win32 Irvine (main)",
                 "9) Win32 Standalone (main)",
-                "10) Win64 Standalone (main)"
+                "10) Win64 Standalone (main)",
+                "11) Mac64 Native (Darling)" // الخيار الجديد
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -501,6 +505,11 @@ export function activate(context: vscode.ExtensionContext) {
                     case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
                     case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
                     case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 11: commands = [
+                        `nasm -f macho64 "${fileName}" -o "${baseName}.o"`, 
+                        `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, 
+                        `darling shell ./"${baseName}"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -515,6 +524,11 @@ export function activate(context: vscode.ExtensionContext) {
                     case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
                     case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
                     case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 11: commands = [
+                        `nasm -f macho64 "${fileName}" -o "${baseName}.o"`, 
+                        `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, 
+                        `darling shell ./"${baseName}"`
+                    ]; break;
                 }
             }
             // ----------------------------------------------------

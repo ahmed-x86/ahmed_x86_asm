@@ -3,7 +3,7 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
   "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {
@@ -56,6 +56,29 @@
     "onLanguage:fasm"
   ],
   "contributes": {
+    "configuration": {
+      "title": "ahmed-x86 ASM Settings",
+      "properties": {
+        "ahmed-x86-asm.cleanup.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically clean up temporary files (.obj, .o, .err, etc.) after a successful build."
+        },
+        "ahmed-x86-asm.cleanup.extensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            ".obj",
+            ".o",
+            ".err",
+            ".lst"
+          ],
+          "description": "List of file extensions to delete when auto-cleanup is enabled."
+        }
+      }
+    },
     "snippets": [
       {
         "language": "assembly",

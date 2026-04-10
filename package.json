@@ -3,7 +3,7 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
   "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux and Windows.",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {
@@ -49,6 +49,8 @@
     "onCommand:ahmed-x86-asm.checkDeps",
     "onCommand:ahmed-x86-asm.resetLinkerMethod",
     "onCommand:ahmed-x86-asm.setLinkerMethod",
+    "onCommand:ahmed-x86-asm.setLinuxLinkerMethod",
+    "onCommand:ahmed-x86-asm.resetLinuxLinkerMethod",
     "onLanguage:assembly",
     "onLanguage:asm",
     "onLanguage:masm",
@@ -140,6 +142,14 @@
       {
         "command": "ahmed-x86-asm.resetLinkerMethod",
         "title": "Reset Win32 Linker to Auto (ahmed_x86)"
+      },
+      {
+        "command": "ahmed-x86-asm.setLinuxLinkerMethod",
+        "title": "Change Linux Linker Method (ahmed_x86)"
+      },
+      {
+        "command": "ahmed-x86-asm.resetLinuxLinkerMethod",
+        "title": "Reset Linux Linker to Default (ahmed_x86)"
       }
     ],
     "keybindings": [

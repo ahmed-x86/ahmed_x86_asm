@@ -76,6 +76,9 @@ async function assembleAndDiagnose(assembleCmd: string, fileDir: string, documen
             // Regex لاصطياد أخطاء UASM
             const uasmRegex = /^(?:[^(]+)\((\d+)\)\s+:\s+(Error|Fatal|Warning)\s+(.*)$/gm;
 
+            // Regex لاصطياد أخطاء GNU Assembler (GAS) لمعمارية ARM
+            const gasRegex = /^(?:[^:]+):(\d+)(?::\d+)?:?\s+(Error|Warning|Fatal):\s+(.*)$/gmi;
+
             let match;
 
             // فحص أخطاء NASM
@@ -111,6 +114,24 @@ async function assembleAndDiagnose(assembleCmd: string, fileDir: string, documen
                 const range = getAccurateErrorRange(lineText, message, safeLine);
                 
                 diagnostics.push(new vscode.Diagnostic(range, `UASM: ${message}`, severity));
+                errorRanges.push(range);
+            }
+
+            // فحص أخطاء GNU Assembler (GAS)
+            while ((match = gasRegex.exec(output)) !== null) {
+                const line = parseInt(match[1], 10) - 1;
+                const severityStr = match[2].toLowerCase();
+                const message = match[3];
+
+                const severity = severityStr.includes('warning') 
+                    ? vscode.DiagnosticSeverity.Warning 
+                    : vscode.DiagnosticSeverity.Error;
+
+                const safeLine = Math.max(0, Math.min(line, document.lineCount - 1));
+                const lineText = document.lineAt(safeLine).text;
+                const range = getAccurateErrorRange(lineText, message, safeLine);
+                
+                diagnostics.push(new vscode.Diagnostic(range, `GAS: ${message}`, severity));
                 errorRanges.push(range);
             }
 
@@ -160,7 +181,10 @@ async function checkDependencies(platform: string) {
                 { name: 'uasm', cmd: 'uasm -h' },
                 { name: 'darling', cmd: 'darling --version' }, // فحص دارلينج
                 { name: 'lld', cmd: 'ld.lld -v' }, // فحص LLVM Linker (لـ FreeBSD)
-                { name: 'qemu-user-static', cmd: 'qemu-x86_64-static --version' } // فحص المحاكي (لـ FreeBSD)
+                { name: 'qemu-user-static', cmd: 'qemu-x86_64-static --version' }, // فحص المحاكي (لـ FreeBSD)
+                { name: 'aarch64-as', cmd: 'aarch64-linux-gnu-as --version' }, // إضافة فحص ARM64
+                { name: 'aarch64-ld', cmd: 'aarch64-linux-gnu-ld -v' }, // إضافة فحص ARM64
+                { name: 'qemu-aarch64-static', cmd: 'qemu-aarch64-static --version' } // إضافة فحص ARM64
             ];
 
             const total = deps.length;
@@ -305,8 +329,10 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const is64Bit = textLower.includes('bits 64') || textLower.includes('elf64') || textLower.includes('win64') || textLower.includes('rax');
     const isMac = textLower.includes('macho64');
     const isFreeBSD = textLower.includes('freebsd') || textLower.includes('fbsd'); // تعرف تلقائي لـ FreeBSD
+    const isArm64 = textLower.includes('aarch64') || textLower.includes('svc #0'); // إضافة لـ ARM64
 
     if (platform === 'linux') {
+        if (isArm64) return { index: 14, name: "Linux ARM64 (_start)" }; // إضافة ARM64
         if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه مع التمييز بين main و _start
         if (isMac) return { index: 11, name: "Mac64 Native (Darling)" };
         if (hasIrvine) return hasMain ? { index: 8, name: "Win32 Irvine (main)" } : { index: 5, name: "Win32 Irvine" };
@@ -471,7 +497,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "10) Win64 Standalone (main)",
                 "11) Mac64 Native (Darling)",
                 "12) FreeBSD 64-bit (_start) (QEMU)",
-                "13) FreeBSD 64-bit (main) (QEMU)" 
+                "13) FreeBSD 64-bit (main) (QEMU)",
+                "14) Linux ARM64 (_start) (QEMU)" // الإضافة الجديدة لـ ARM64
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -526,6 +553,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `ld.lld -m elf_x86_64_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
                         `qemu-x86_64-static ./"${baseName}"`
                     ]; break;
+                    case 14: commands = [
+                        `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
+                        `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, 
+                        `qemu-aarch64-static ./"${baseName}"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -554,6 +586,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
                         `ld.lld -m elf_x86_64_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
                         `qemu-x86_64-static ./"${baseName}"`
+                    ]; break;
+                    case 14: commands = [
+                        `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
+                        `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, 
+                        `qemu-aarch64-static ./"${baseName}"`
                     ]; break;
                 }
             }
@@ -619,7 +656,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // --- الإضافة الجديدة: نظام بناء ذكي مع عرض كافة السجلات في الطرفية ---
         if (commands.length > 0) {
-            const assembleCmd = commands[0];                          // الأمر الأول: المجمع (nasm/uasm)
+            const assembleCmd = commands[0];                          // الأمر الأول: المجمع (nasm/uasm/gas)
             const linkCmd = commands.length > 1 ? commands[1] : null; // الأمر الثاني: الرابط (ld/gcc)
             const runCommands = commands.length > 2 ? commands.slice(2) : []; // الأوامر المتبقية: التشغيل
 

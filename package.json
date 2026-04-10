@@ -2,8 +2,8 @@
   "name": "ahmed-x86-asm",
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
-  "description": "Powerful, all-in-one tool to instantly compile and run x86 Assembly code on Linux, Windows, and macOS (via Darling).",
-  "version": "1.2.6",
+  "description": "Powerful, all-in-one tool to instantly compile and run x86, ARM, and MIPS Assembly code. Supporting every possible ASM flavor!",
+  "version": "1.2.7",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {
@@ -42,7 +42,11 @@
     "x86_64",
     "32bit",
     "64bit",
-    "gdb"
+    "gdb",
+    "mips",
+    "arm",
+    "arm64",
+    "riscv"
   ],
   "main": "./out/extension.js",
   "activationEvents": [
@@ -57,8 +61,20 @@
     "onLanguage:assembly",
     "onLanguage:asm",
     "onLanguage:masm",
+    "onLanguage:MASM",
     "onLanguage:nasm",
-    "onLanguage:fasm"
+    "onLanguage:NASM",
+    "onLanguage:fasm",
+    "onLanguage:FASM",
+    "onLanguage:uasm",
+    "onLanguage:UASM",
+    "onLanguage:arm",
+    "onLanguage:ARM",
+    "onLanguage:mips",
+    "onLanguage:MIPS",
+    "onLanguage:riscv",
+    "onLanguage:gas",
+    "onLanguage:ibm-asm"
   ],
   "contributes": {
     "configuration": {
@@ -85,49 +101,34 @@
       }
     },
     "snippets": [
-      {
-        "language": "assembly",
-        "path": "./snippets.json"
-      },
-      {
-        "language": "asm",
-        "path": "./snippets.json"
-      },
-      {
-        "language": "masm",
-        "path": "./snippets.json"
-      },
-      {
-        "language": "nasm",
-        "path": "./snippets.json"
-      },
-      {
-        "language": "fasm",
-        "path": "./snippets.json"
-      }
+      { "language": "assembly", "path": "./snippets.json" },
+      { "language": "asm", "path": "./snippets.json" },
+      { "language": "masm", "path": "./snippets.json" },
+      { "language": "MASM", "path": "./snippets.json" },
+      { "language": "nasm", "path": "./snippets.json" },
+      { "language": "NASM", "path": "./snippets.json" },
+      { "language": "fasm", "path": "./snippets.json" },
+      { "language": "FASM", "path": "./snippets.json" },
+      { "language": "uasm", "path": "./snippets.json" },
+      { "language": "UASM", "path": "./snippets.json" },
+      { "language": "arm", "path": "./snippets.json" },
+      { "language": "mips", "path": "./snippets.json" }
     ],
     "languages": [
       {
         "id": "assembly",
         "extensions": [
-          ".asm",
-          ".s",
-          ".inc",
-          ".nasm",
-          ".masm",
-          ".uasm"
+          ".asm", ".s", ".S", ".inc", ".nasm", ".masm", ".uasm", ".fasm", ".mips", ".arm", ".riscv"
         ],
         "aliases": [
-          "Assembly",
-          "asm",
-          "x86 Assembly"
+          "Assembly", "asm", "x86 Assembly", "NASM", "MASM", "UASM", "FASM", "ARM Assembly", "MIPS Assembly", "GAS"
         ]
       }
     ],
     "commands": [
       {
         "command": "ahmed-x86-asm.run",
-        "title": "Run x86 Assembly (ahmed_x86)",
+        "title": "Run Assembly (ahmed_x86)",
         "icon": "$(play)"
       },
       {
@@ -165,7 +166,7 @@
         "command": "ahmed-x86-asm.run",
         "key": "ctrl+alt+a",
         "mac": "cmd+alt+a",
-        "when": "editorTextFocus && (resourceLangId == assembly || resourceExtname =~ /\\.(asm|s|S|inc|nasm|masm|uasm)$/)"
+        "when": "editorTextFocus && (resourceLangId =~ /^(assembly|asm|nasm|masm|fasm|uasm|arm|mips|gas|riscv)$/i || resourceExtname =~ /\\.(asm|s|S|inc|nasm|masm|uasm|fasm|mips|arm)$/i)"
       }
     ],
     "menus": {
@@ -173,14 +174,14 @@
         {
           "command": "ahmed-x86-asm.run",
           "group": "navigation@1",
-          "when": "resourceLangId == assembly || resourceExtname =~ /\\.(asm|s|S|inc|mac|nasm|masm|uasm)$/"
+          "when": "resourceLangId =~ /^(assembly|asm|nasm|masm|fasm|uasm|arm|mips|gas|riscv)$/i || resourceExtname =~ /\\.(asm|s|S|inc|mac|nasm|masm|uasm|fasm|mips|arm)$/i"
         }
       ],
       "editor/title": [
         {
           "command": "ahmed-x86-asm.showSettingsMenu",
           "group": "navigation@2",
-          "when": "resourceLangId == assembly || resourceExtname =~ /\\.(asm|s|S|inc|mac|nasm|masm|uasm)$/"
+          "when": "resourceLangId =~ /^(assembly|asm|nasm|masm|fasm|uasm|arm|mips|gas|riscv)$/i || resourceExtname =~ /\\.(asm|s|S|inc|mac|nasm|masm|uasm|fasm|mips|arm)$/i"
         }
       ]
     }

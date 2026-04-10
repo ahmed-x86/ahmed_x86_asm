@@ -268,7 +268,7 @@
       "\tcall ExitProcess"
     ],
     "description": "Win64 Standalone template using _start"
-  }
+  },
   "macOS 64-bit (main)": {
     "prefix": "mac64-main",
     "body": [
@@ -296,5 +296,31 @@
       "\tret"
     ],
     "description": "Template for macOS 64-bit using main (Apple official method)"
+  },
+  "FreeBSD 64-bit (_start)": {
+    "prefix": "freebsd64-start",
+    "body": [
+      "; freebsd64.asm - Hello World for FreeBSD 64-bit",
+      "section .data",
+      "\tmsg db \"Hello from FreeBSD 64-bit on Arch Linux!\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal _start",
+      "",
+      "_start:",
+      "\t; 1. sys_write (FreeBSD rax = 4)",
+      "\tmov rax, 4          ; syscall for sys_write in FreeBSD",
+      "\tmov rdi, 1          ; stdout",
+      "\tmov rsi, msg        ; message address",
+      "\tmov rdx, len        ; message length",
+      "\tsyscall",
+      "",
+      "\t; 2. sys_exit (FreeBSD rax = 1)",
+      "\tmov rax, 1          ; syscall for sys_exit in FreeBSD",
+      "\txor rdi, rdi        ; exit status 0",
+      "\tsyscall"
+    ],
+    "description": "Template for FreeBSD 64-bit using _start (Raw Syscalls)"
   }
 }

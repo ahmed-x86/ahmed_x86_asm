@@ -373,5 +373,30 @@
       "\tsvc #0"
     ],
     "description": "Template for Linux ARM64 using _start (GNU Assembler)"
+  },
+  "Linux ARM32 (_start)": {
+    "prefix": "linux-arm32-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from ARM32 Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\t/* sys_write (r7 = 4) */",
+      "\tmov r7, #4          // syscall for write",
+      "\tmov r0, #1          // stdout",
+      "\tldr r1, =msg        // message address",
+      "\tldr r2, =len        // message length",
+      "\tsvc #0              // Supervisor Call",
+      "",
+      "\t/* sys_exit (r7 = 1) */",
+      "\tmov r7, #1          // syscall for exit",
+      "\tmov r0, #0          // exit status 0",
+      "\tsvc #0"
+    ],
+    "description": "Template for Linux ARM32 using _start (GNU Assembler)"
   }
 }

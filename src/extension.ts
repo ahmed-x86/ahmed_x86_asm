@@ -76,7 +76,7 @@ async function assembleAndDiagnose(assembleCmd: string, fileDir: string, documen
             // Regex لاصطياد أخطاء UASM
             const uasmRegex = /^(?:[^(]+)\((\d+)\)\s+:\s+(Error|Fatal|Warning)\s+(.*)$/gm;
 
-            // Regex لاصطياد أخطاء GNU Assembler (GAS) لمعمارية ARM
+            // Regex لاصطياد أخطاء GNU Assembler (GAS) لمعمارية ARM و RISC-V
             const gasRegex = /^(?:[^:]+):(\d+)(?::\d+)?:?\s+(Error|Warning|Fatal):\s+(.*)$/gmi;
 
             let match;
@@ -186,7 +186,10 @@ async function checkDependencies(platform: string) {
                 { name: 'aarch64-ld', cmd: 'aarch64-linux-gnu-ld -v' }, // إضافة فحص ARM64
                 { name: 'qemu-aarch64-static', cmd: 'qemu-aarch64-static --version' }, // إضافة فحص ARM64
                 { name: 'arm-none-eabi-as', cmd: 'arm-none-eabi-as --version' }, // إضافة فحص ARM32
-                { name: 'qemu-arm-static', cmd: 'qemu-arm-static --version' } // إضافة فحص ARM32
+                { name: 'qemu-arm-static', cmd: 'qemu-arm-static --version' }, // إضافة فحص ARM32
+                { name: 'riscv64-as', cmd: 'riscv64-linux-gnu-as --version' }, // إضافة فحص RISC-V 64
+                { name: 'riscv64-ld', cmd: 'riscv64-linux-gnu-ld -v' }, // إضافة فحص RISC-V 64
+                { name: 'qemu-riscv64-static', cmd: 'qemu-riscv64-static --version' } // إضافة فحص RISC-V 64 محاكي
             ];
 
             const total = deps.length;
@@ -337,12 +340,14 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isWinArm64 = textLower.includes('win-arm64') || textLower.includes('windows arm64'); // إضافة التميز لـ Windows ARM64
     const isWinArm32 = textLower.includes('win-arm32') || textLower.includes('windows arm32'); // إضافة التميز لـ Windows ARM32
     const isMacArm64 = textLower.includes('mac-arm64') || textLower.includes('apple silicon'); // إضافة التميز لـ macOS ARM64
+    const isRiscv64 = textLower.includes('riscv64') || textLower.includes('ecall'); // إضافة لـ RISC-V 64
 
     if (platform === 'linux') {
+        if (isRiscv64) return { index: 25, name: "Linux RISC-V 64-bit (_start) (QEMU)" }; // <--- دعم _start فقط حالياً
         if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" };
         if (isWinArm32) return hasMain ? { index: 21, name: "win_arm32_main(compile but not run)" } : { index: 20, name: "win_arm32_start(compile but not run)" };
         if (isMacArm64) return { index: 22, name: "mac_arm64_main(compile but not run)" };
-        if (isFreeBSD32) return hasMain ? { index: 24, name: "FreeBSD 32-bit (main) (compile but not run)" } : { index: 23, name: "FreeBSD 32-bit (_start) (compile but not run)" }; // <--- الكشف التلقائي لـ FreeBSD 32 main و _start
+        if (isFreeBSD32) return hasMain ? { index: 24, name: "FreeBSD 32-bit (main) (compile but not run)" } : { index: 23, name: "FreeBSD 32-bit (_start) (compile but not run)" };
         if (isArm64) return hasMain ? { index: 16, name: "Linux ARM64 (main)" } : { index: 14, name: "Linux ARM64 (_start)" }; 
         if (isArm32) return hasMain ? { index: 17, name: "Linux ARM32 (main)" } : { index: 15, name: "Linux ARM32 (_start)" }; 
         if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; 
@@ -547,7 +552,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "21) win_arm32_main(compile but not run)",
                 "22) mac_arm64_main(compile but not run)",
                 "23) FreeBSD 32-bit (_start) (compile but not run)",
-                "24) FreeBSD 32-bit (main) (compile but not run)" // <--- الإضافة الجديدة لـ FreeBSD 32-bit main
+                "24) FreeBSD 32-bit (main) (compile but not run)", 
+                "25) Linux RISC-V 64-bit (_start) (QEMU)"         // <--- الإضافة الجديدة لـ RISC-V 64-bit _start فقط
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -654,6 +660,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
                         `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
                     ]; break;
+                    case 25: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit _start
+                        `riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`,
+                        `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`,
+                        `qemu-riscv64-static ./"${baseName}"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -734,6 +745,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
                         `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
                         `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
+                    ]; break;
+                    case 25: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit _start
+                        `riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`,
+                        `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`,
+                        `qemu-riscv64-static ./"${baseName}"`
                     ]; break;
                 }
             }

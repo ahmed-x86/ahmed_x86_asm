@@ -333,8 +333,10 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isFreeBSD = textLower.includes('freebsd') || textLower.includes('fbsd'); // تعرف تلقائي لـ FreeBSD
     const isArm64 = textLower.includes('aarch64') || textLower.includes('x8'); // إضافة لـ ARM64
     const isArm32 = textLower.includes('r7') || textLower.includes('svc #0'); // إضافة لـ ARM32
+    const isWinArm64 = textLower.includes('win-arm64') || textLower.includes('windows arm64'); // <--- إضافة التميز لـ Windows ARM64
 
     if (platform === 'linux') {
+        if (isWinArm64) return { index: 18, name: "win_arm64_start(compile but not run)" }; // <--- الكشف التلقائي هنا
         if (isArm64) return hasMain ? { index: 16, name: "Linux ARM64 (main)" } : { index: 14, name: "Linux ARM64 (_start)" }; // إضافة وتعديل ARM64
         if (isArm32) return hasMain ? { index: 17, name: "Linux ARM32 (main)" } : { index: 15, name: "Linux ARM32 (_start)" }; // <--- إضافة التعديل هنا لـ ARM32 main
         if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه مع التمييز بين main و _start
@@ -498,7 +500,6 @@ export function activate(context: vscode.ExtensionContext) {
         const fileName = path.basename(filePath);
         const baseName = path.parse(fileName).name; 
 
-        // قراءة محتوى الملف لتحليله
         const fileText = editor.document.getText();
         const autoDetected = detectBestOption(fileText, platform);
 
@@ -532,7 +533,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "14) Linux ARM64 (_start) (QEMU)", 
                 "15) Linux ARM32 (_start) (QEMU)",
                 "16) Linux ARM64 (main) (QEMU)",
-                "17) Linux ARM32 (main) (QEMU)" // <--- الإضافة الجديدة هنا
+                "17) Linux ARM32 (main) (QEMU)", // <--- الإضافة الجديدة هنا
+                "18) win_arm64_start(compile but not run)" // <--- الإضافة الجديدة لـ Windows ARM64
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -602,14 +604,17 @@ export function activate(context: vscode.ExtensionContext) {
                         `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, 
                         `qemu-aarch64-static ./"${baseName}"`
                     ]; break;
-                    case 17: commands = [ // <--- الإضافة الجديدة هنا
+                    case 17: commands = [ 
                         `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
                         `arm-none-eabi-ld "${baseName}.o" -o "${baseName}" -e main`, 
                         `qemu-arm-static ./"${baseName}"`
                     ]; break;
+                    case 18: commands = [
+                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
+                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device"`
+                    ]; break;
                 }
             } else {
-                // أوامر لينكس المقسمة (باستخدام ld القياسي)
                 switch (selectedIndex) {
                     case 1: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
                     case 2: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld -e main "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
@@ -651,10 +656,14 @@ export function activate(context: vscode.ExtensionContext) {
                         `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, 
                         `qemu-aarch64-static ./"${baseName}"`
                     ]; break;
-                    case 17: commands = [ // <--- الإضافة الجديدة هنا
+                    case 17: commands = [ 
                         `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
                         `arm-none-eabi-ld "${baseName}.o" -o "${baseName}" -e main`, 
                         `qemu-arm-static ./"${baseName}"`
+                    ]; break;
+                    case 18: commands = [
+                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
+                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`
                     ]; break;
                 }
             }

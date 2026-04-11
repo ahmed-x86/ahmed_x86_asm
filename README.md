@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.3.5/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.3.6/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,6 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 
 ## ✨ Features
+- **⚓ FreeBSD 32-bit (x86) Support (New in v1.3.6!)**: The BSD collection expands! You can now cross-compile FreeBSD 32-bit Assembly using the standard `_start` entry point with Stack-based Syscalls directly from Linux.
 - **🍎 macOS ARM64 (Apple Silicon) Support (New in v1.3.5!)**: The ultimate breach! You can now cross-compile macOS ARM64 Assembly using the C-style `_main` entry point and `libSystem`. Perfect for building for M1/M2/M3 chips directly from your Arch Linux machine.
 - **🦾 Windows ARM32 (main) Support (New in v1.3.4!)**: The ARM circle is now complete! You can now cross-compile Windows ARM32 (AArch32/armv7) Assembly using the C-style `main` entry point, allowing seamless integration with the C Runtime on 32-bit ARM hardware.
 - **🦾 Windows ARM32 Cross-Compilation (New in v1.3.3!)**: Breaking more physical boundaries! You can now cross-compile Windows ARM32 (AArch32/armv7) Assembly using `_start`. It compiles perfectly on Arch Linux, but reminds you that your x86_64 atoms still can't natively run ARM32 code!
@@ -44,7 +45,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 - **💡 Smart Hover Logs (Added in v1.1.8)**: Say goodbye to opening separate `.err` files! Simply hover your mouse over the red error squiggles in your code, and an elegant pop-up will instantly display the complete compiler error log.
 - **📜 Transparent Build Logging & Error Prevention (Added in v1.1.7)**: See exactly what's happening under the hood! The extension logs every build command directly to the terminal for full transparency. 
 - **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler in the background, highlighting the exact word with a red squiggle and a custom gutter icon. Now supporting NASM, UASM, and GAS (for ARM).
-- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `svc #0`, `freebsd`, `macho64`, `irvine32`, `elf64`, `win-arm64`, `win-arm32`) to instantly recommend the perfect build mode.
+- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `svc #0`, `freebsd`, `freebsd32`, `macho64`, `irvine32`, `elf64`, `win-arm64`, `win-arm32`) to instantly recommend the perfect build mode.
 - **🎛️ Manual Win32/Linux Linker Override**: Full manual control to switch between `ld` and `gcc` linkers to ensure maximum stability.
 - **🖥️ Sequential Terminal Execution**: Commands are sent sequentially to the terminal for a cleaner output and easier debugging.
 - **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine, darling, lld, qemu, aarch64-linux-gnu-binutils, arm-none-eabi-binutils) are installed. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html).**
@@ -86,6 +87,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | :--- | :--- |
 | `freebsd64-start` | FreeBSD 64-bit boilerplate using Raw Syscalls and `_start` |
 | `freebsd64-main` | FreeBSD 64-bit boilerplate using `main` |
+| `freebsd32-start` | FreeBSD 32-bit boilerplate using Stack Syscalls and `_start` |
 
 ### 🍎 macOS (Mach-O) Templates
 | Prefix | Description |

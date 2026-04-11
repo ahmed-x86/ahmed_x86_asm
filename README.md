@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.3.7/blue?style=flat-square" alt="Version">
-  <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
+  <img src="https://badgen.net/badge/Version/1.3.8/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20RISC-V%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
   </a>
@@ -20,11 +20,12 @@
   </a>
 </p>
 
-A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64, ARM64, ARM32, MIPS & FASM Assembly** code directly from your editor. Now supporting **Linux**, **Windows**, **macOS (via Darling)**, and **FreeBSD (via QEMU)** with a seamless cross-platform workflow for native and cross-platform Assembly development.
+A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64, ARM64, ARM32, RISC-V, MIPS & FASM Assembly** code directly from your editor. Now supporting **Linux**, **Windows**, **macOS (via Darling)**, and **FreeBSD (via QEMU)** with a seamless cross-platform workflow for native and cross-platform Assembly development.
 
 ---
 
 ## ✨ Features
+- **🪐 Linux RISC-V 64-bit Support (New in v1.3.8!)**: Enter the future of open hardware! You can now cross-compile and run RISC-V 64-bit Linux Assembly using the `_start` entry point directly from your Linux machine using `qemu-riscv64-static`.
 - **⚓ FreeBSD 32-bit (main) Support (New in v1.3.7!)**: We went deeper! You can now cross-compile FreeBSD 32-bit Assembly using the C-style `main` entry point. It fully supports FreeBSD's unique stack-based syscall convention right from your Linux terminal.
 - **⚓ FreeBSD 32-bit (x86) Support (New in v1.3.6!)**: The BSD collection expands! You can now cross-compile FreeBSD 32-bit Assembly using the standard `_start` entry point with Stack-based Syscalls directly from Linux.
 - **🍎 macOS ARM64 (Apple Silicon) Support (New in v1.3.5!)**: The ultimate breach! You can now cross-compile macOS ARM64 Assembly using the C-style `_main` entry point and `libSystem`. Perfect for building for M1/M2/M3 chips directly from your Arch Linux machine.
@@ -45,11 +46,11 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 - **🗑️ Auto-Cleanup Temporary Files (Added in v1.1.9)**: Keep your project folders clean! The extension can automatically delete temporary build files (`.obj`, `.o`, `.err`, `.lst`) after a successful run. Completely customizable via settings.
 - **💡 Smart Hover Logs (Added in v1.1.8)**: Say goodbye to opening separate `.err` files! Simply hover your mouse over the red error squiggles in your code, and an elegant pop-up will instantly display the complete compiler error log.
 - **📜 Transparent Build Logging & Error Prevention (Added in v1.1.7)**: See exactly what's happening under the hood! The extension logs every build command directly to the terminal for full transparency. 
-- **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler in the background, highlighting the exact word with a red squiggle and a custom gutter icon. Now supporting NASM, UASM, and GAS (for ARM).
-- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `svc #0`, `freebsd`, `freebsd32`, `macho64`, `irvine32`, `elf64`, `win-arm64`, `win-arm32`) to instantly recommend the perfect build mode.
+- **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler in the background, highlighting the exact word with a red squiggle and a custom gutter icon. Now supporting NASM, UASM, and GAS (for ARM and RISC-V).
+- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `svc #0`, `ecall`, `riscv64`, `freebsd`, `macho64`, `irvine32`, `win-arm64`) to instantly recommend the perfect build mode.
 - **🎛️ Manual Win32/Linux Linker Override**: Full manual control to switch between `ld` and `gcc` linkers to ensure maximum stability.
 - **🖥️ Sequential Terminal Execution**: Commands are sent sequentially to the terminal for a cleaner output and easier debugging.
-- **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine, darling, lld, qemu, aarch64-linux-gnu-binutils, arm-none-eabi-binutils) are installed. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html).**
+- **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine, darling, lld, qemu, cross-compilers) are installed. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html).**
 - **⚡ One-Click Execution**: Integrated directly into the editor's Run button menu.
 - **🧠 Dynamic Irvine Path**: Persistent path saver for the `Irvine32.inc` library.
 - **📁 Broad Compatibility**: Automatically detects a wide range of assembly extensions (`.asm`, `.s`, `.S`, `.inc`, `.nasm`, `.masm`, `.uasm`, `.fasm`, `.mips`).
@@ -61,7 +62,7 @@ You can access these features at any time via the **new Tools & Settings button 
 
 - `ahmed-x86 ASM: Settings & Tools`: Opens the unified interactive menu to manage all extension features.
 - `Toggle Wine Log Visibility`: Show or hide Wine terminal warnings directly from the settings menu.
-- `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify tools like `nasm`, `gcc`, `wine`, `darling`, `lld`, `aarch64-linux-gnu-as`, and `arm-none-eabi-as`.
+- `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify tools like `nasm`, `gcc`, `wine`, `darling`, `lld`, `aarch64-linux-gnu-as`, `arm-none-eabi-as`, and `riscv64-linux-gnu-as`.
 - `Reset Irvine Library Path`: Clears your saved Irvine directory path.
 - `Change Linux/Win32 Linker Method`: Manually switch between `ld` and `gcc`.
 
@@ -69,7 +70,12 @@ You can access these features at any time via the **new Tools & Settings button 
 
 ## 📝 Snippets & Templates
 
-Stop writing boilerplate from scratch! Type any of the following prefixes in an empty `.asm` file and press `Tab` or `Enter` to generate a complete template:
+Stop writing boilerplate from scratch! Type any of the following prefixes in an empty `.asm` or `.s` file and press `Tab` or `Enter` to generate a complete template:
+
+### 🪐 RISC-V Templates
+| Prefix | Description |
+| :--- | :--- |
+| `linux-riscv64-start` | Linux RISC-V 64-bit boilerplate using GNU Assembler (GAS) |
 
 ### 🦾 ARM Templates
 | Prefix | Description |
@@ -124,6 +130,7 @@ Ensure your system has the following dependencies installed:
 - **For FreeBSD support:** `lld` (linker) and `qemu-user-static` (runner).
 - **For Linux ARM64 support:** `aarch64-linux-gnu-binutils` and `qemu-aarch64-static`.
 - **For Linux ARM32 support:** `arm-none-eabi-binutils` and `qemu-arm-static`.
+- **For Linux RISC-V 64-bit support:** `riscv64-linux-gnu-binutils` and `qemu-riscv64-static`.
 - **For Windows ARM (64/32) support:** `llvm-mingw-w64-toolchain-ucrt-bin` (AUR).
 
 ### 🪟 For Windows Users:
@@ -135,7 +142,7 @@ Ensure your system has an **MSYS2** environment set up with:
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `linux-arm32-main` or `win-arm32-main`) and press `Tab`.
+2. Type a snippet prefix (e.g., `linux-riscv64-start` or `linux-arm32-main`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!

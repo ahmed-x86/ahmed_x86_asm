@@ -692,5 +692,30 @@
       "\tint 0x80"
     ],
     "description": "Template for FreeBSD 32-bit using main"
+  },
+  "linux_riscv64_start.s": {
+    "prefix": "linux-riscv64-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 64-bit Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\t/* sys_write (a7 = 64) */",
+      "\tli a7, 64           # Load Immediate: syscall number for write (64)",
+      "\tli a0, 1            # fd = 1 (stdout)",
+      "\tla a1, msg          # Load Address: pointer to message",
+      "\tli a2, len          # message length",
+      "\tecall               # Environment Call (Syscall)",
+      "",
+      "\t/* sys_exit (a7 = 93) */",
+      "\tli a7, 93           # syscall number for exit (93)",
+      "\tli a0, 0            # exit status 0",
+      "\tecall               # Environment Call (Syscall)"
+    ],
+    "description": "Template for Linux RISC-V 64-bit using _start"
   }
 }

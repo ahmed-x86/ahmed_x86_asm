@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.2.8/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.2.9/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -26,6 +26,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 
 ## ✨ Features
 
+- **🦾 Linux ARM32 (main) Support (New in v1.2.9!)**: Complete the set! You can now compile and run ARM32 (AArch32) Assembly using the C-style `main` entry point seamlessly, completing the ARM support lineup.
 - **🦾 Linux ARM64 (main) Support (New in v1.2.8!)**: Full flexibility! You can now compile and run ARM64 Assembly using the C-style `main` entry point seamlessly, in addition to the standard `_start`.
 - **🚀 Universal Assembly Mode Support (New in v1.2.7!)**: Total freedom! The extension now supports and detects almost every Assembly flavor, including **MASM (case-insensitive)**, **FASM**, **MIPS**, **UASM**, and **RISC-V**. Even if you manually change the language mode in the status bar or use other ASM extensions, the "Run" and "Info" buttons will stay active and ready to work.
 - **🦾 Linux ARM32 Support (New in v1.2.6!)**: The legacy lives on! You can now write and run **ARM32 (AArch32)** Assembly directly on your Linux machine. Utilizing `arm-none-eabi-as` for assembling and `qemu-arm-static` for execution, perfect for learning embedded systems and mobile architecture.
@@ -65,7 +66,8 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 ### 🦾 ARM Templates
 | Prefix | Description |
 | :--- | :--- |
-| `linux-arm64-main` | **(New in v1.2.8!)** Linux ARM64 (AArch64) boilerplate using `main` |
+| `linux-arm32-main` | **(New in v1.2.9!)** Linux ARM32 (AArch32) boilerplate using `main` |
+| `linux-arm64-main` | Linux ARM64 (AArch64) boilerplate using `main` |
 | `linux-arm32-start` | Linux ARM32 (AArch32) boilerplate using GNU Assembler (GAS) |
 | `linux-arm64-start` | Linux ARM64 (AArch64) boilerplate using GNU Assembler (GAS) |
 
@@ -117,7 +119,7 @@ Ensure your system has an **MSYS2** environment set up with:
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `linux-arm64-main`) and press `Tab`.
+2. Type a snippet prefix (e.g., `linux-arm32-main` or `linux-arm64-main`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!

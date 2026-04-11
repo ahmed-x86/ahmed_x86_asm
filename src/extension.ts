@@ -336,7 +336,7 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
 
     if (platform === 'linux') {
         if (isArm64) return hasMain ? { index: 16, name: "Linux ARM64 (main)" } : { index: 14, name: "Linux ARM64 (_start)" }; // إضافة وتعديل ARM64
-        if (isArm32) return { index: 15, name: "Linux ARM32 (_start)" }; // إضافة ARM32
+        if (isArm32) return hasMain ? { index: 17, name: "Linux ARM32 (main)" } : { index: 15, name: "Linux ARM32 (_start)" }; // <--- إضافة التعديل هنا لـ ARM32 main
         if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه مع التمييز بين main و _start
         if (isMac) return { index: 11, name: "Mac64 Native (Darling)" };
         if (hasIrvine) return hasMain ? { index: 8, name: "Win32 Irvine (main)" } : { index: 5, name: "Win32 Irvine" };
@@ -504,7 +504,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "13) FreeBSD 64-bit (main) (QEMU)",
                 "14) Linux ARM64 (_start) (QEMU)", 
                 "15) Linux ARM32 (_start) (QEMU)",
-                "16) Linux ARM64 (main) (QEMU)"
+                "16) Linux ARM64 (main) (QEMU)",
+                "17) Linux ARM32 (main) (QEMU)" // <--- الإضافة الجديدة هنا
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -574,6 +575,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, 
                         `qemu-aarch64-static ./"${baseName}"`
                     ]; break;
+                    case 17: commands = [ // <--- الإضافة الجديدة هنا
+                        `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
+                        `arm-none-eabi-ld "${baseName}.o" -o "${baseName}" -e main`, 
+                        `qemu-arm-static ./"${baseName}"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -617,6 +623,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
                         `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, 
                         `qemu-aarch64-static ./"${baseName}"`
+                    ]; break;
+                    case 17: commands = [
+                        `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
+                        `arm-none-eabi-ld "${baseName}.o" -o "${baseName}" -e main`, 
+                        `qemu-arm-static ./"${baseName}"`
                     ]; break;
                 }
             }
@@ -807,7 +818,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(setLinuxLinkerDisposable);   
     context.subscriptions.push(runDisposable);
     context.subscriptions.push(hoverDisposable); 
-    context.subscriptions.push(showSettingsMenuDisposable); // <--- تم تسجيل الأمر الجديد هنا
+    context.subscriptions.push(showSettingsMenuDisposable);
 }
 
 export function deactivate() {}

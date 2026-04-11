@@ -335,10 +335,12 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isArm32 = textLower.includes('r7') || textLower.includes('svc #0'); // إضافة لـ ARM32
     const isWinArm64 = textLower.includes('win-arm64') || textLower.includes('windows arm64'); // <--- إضافة التميز لـ Windows ARM64
     const isWinArm32 = textLower.includes('win-arm32') || textLower.includes('windows arm32'); // <--- إضافة التميز لـ Windows ARM32
+    const isMacArm64 = textLower.includes('mac-arm64') || textLower.includes('apple silicon'); // <--- إضافة التميز لـ macOS ARM64
 
     if (platform === 'linux') {
         if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" }; // <--- الكشف التلقائي هنا
         if (isWinArm32) return hasMain ? { index: 21, name: "win_arm32_main(compile but not run)" } : { index: 20, name: "win_arm32_start(compile but not run)" }; // <--- الكشف التلقائي لـ ARM32
+        if (isMacArm64) return { index: 22, name: "mac_arm64_main(compile but not run)" }; // <--- الكشف التلقائي لـ macOS ARM64
         if (isArm64) return hasMain ? { index: 16, name: "Linux ARM64 (main)" } : { index: 14, name: "Linux ARM64 (_start)" }; // إضافة وتعديل ARM64
         if (isArm32) return hasMain ? { index: 17, name: "Linux ARM32 (main)" } : { index: 15, name: "Linux ARM32 (_start)" }; // <--- إضافة التعديل هنا لـ ARM32 main
         if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه مع التمييز بين main و _start
@@ -540,7 +542,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "18) win_arm64_start(compile but not run)",
                 "19) win_arm64_main(compile but not run)",
                 "20) win_arm32_start(compile but not run)",
-                "21) win_arm32_main(compile but not run)" // <--- الإضافة الجديدة لـ Windows ARM32 main
+                "21) win_arm32_main(compile but not run)",
+                "22) mac_arm64_main(compile but not run)" // <--- الإضافة الجديدة هنا لـ macOS ARM64
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -627,10 +630,16 @@ export function activate(context: vscode.ExtensionContext) {
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
                         `echo "\\nNote: We have breached the realms of architectures.. The code is sound 32-bit, but the atoms of your x86_64 processor still refuse to dance to the rhythms of ARM32 Windows."`
                     ]; break;
-                    case 21: commands = [ // <--- الإضافة الجديدة لـ Windows ARM32 (main)
+                    case 21: commands = [
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
                         `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device 😅"`
                     ]; break;
+                    case 22:
+                        commands = [
+                            `aarch64-apple-darwin20.4-clang "${fileName}" -o "${baseName}"`,
+                            `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`
+                        ];
+                        break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -692,12 +701,19 @@ export function activate(context: vscode.ExtensionContext) {
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
                         `echo "\\nNote: We have breached the realms of architectures.. The code is sound 32-bit, but the atoms of your x86_64 processor still refuse to dance to the rhythms of ARM32 Windows."`
                     ]; break;
-                    case 21: commands = [ // <--- الإضافة الجديدة لـ Windows ARM32 (main)
+                    case 21: commands = [
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
                         `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device "`
                     ]; break;
+                    case 22:
+                        commands = [
+                            `aarch64-apple-darwin20.4-clang "${fileName}" -o "${baseName}"`,
+                            `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`
+                        ];
+                        break;
                 }
             }
+            // ----------------------------------------------------
         } else if (platform === 'win32') {
             options = [
                 `✨ Auto Detect: ${autoDetected.name}`,
@@ -754,8 +770,10 @@ export function activate(context: vscode.ExtensionContext) {
                     case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-emain'`, `.\\${baseName}.exe`]; break;
                 }
             }
+            // ----------------------------------------------------
         }
 
+        // --- الإضافة الجديدة: نظام بناء ذكي مع عرض كافة السجلات في الطرفية ---
         if (commands.length > 0) {
             const assembleCmd = commands[0];                          // الأمر الأول: المجمع (nasm/uasm/gas)
             const linkCmd = commands.length > 1 ? commands[1] : null; // الأمر الثاني: الرابط (ld/gcc)

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.3.0/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.3.2/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -26,6 +26,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 
 ## ✨ Features
 
+- **🦾 Windows ARM64 (main) Support (New in v1.3.2!)**: The saga continues! You can now cross-compile Windows ARM64 Assembly using the C-style `main` entry point. Perfect for projects integrating with the C Runtime on ARM hardware.
 - **🪟 Windows ARM64 Cross-Compilation (New!)**: The ultimate flex! You can now cross-compile Windows ARM64 Assembly directly from your Linux machine. It compiles perfectly, but outputs a fun physics reminder since you can't natively run it on x86_64!
 - **🍷 Smart Wine Log Control (New in v1.3.0!)**: Say goodbye to annoying GPU and Mesa warnings when running Windows apps on Linux! You can now easily toggle Wine logs (ON/OFF) directly from the Tools & Settings menu for a perfectly clean terminal output.
 - **🦾 Linux ARM32 (main) Support (New in v1.2.9!)**: Complete the set! You can now compile and run ARM32 (AArch32) Assembly using the C-style `main` entry point seamlessly, completing the ARM support lineup.
@@ -73,6 +74,8 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | `linux-arm64-main` | Linux ARM64 (AArch64) boilerplate using `main` |
 | `linux-arm32-start` | Linux ARM32 (AArch32) boilerplate using GNU Assembler (GAS) |
 | `linux-arm64-start` | Linux ARM64 (AArch64) boilerplate using GNU Assembler (GAS) |
+| `win-arm64-start` | Windows ARM64 boilerplate using `_start` (Cross-compile only) |
+| `win-arm64-main` | Windows ARM64 boilerplate using C-style `main` (Cross-compile only) |
 
 ### FreeBSD Templates
 | Prefix | Description |
@@ -100,7 +103,6 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | `win32-std-start` | Win32 pure Windows API using `_start` |
 | `win64-std-main` | Win64 pure Windows API using `main` |
 | `win64-std-start` | Win64 pure Windows API using `_start` |
-| `win-arm64-start` | Windows ARM64 boilerplate using `_start` (Cross-compile only) |
 
 ---
 
@@ -124,7 +126,7 @@ Ensure your system has an **MSYS2** environment set up with:
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `linux-arm32-main` or `win-arm64-start`) and press `Tab`.
+2. Type a snippet prefix (e.g., `linux-arm32-main` or `win-arm64-main`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!

@@ -342,7 +342,7 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
         if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" };
         if (isWinArm32) return hasMain ? { index: 21, name: "win_arm32_main(compile but not run)" } : { index: 20, name: "win_arm32_start(compile but not run)" };
         if (isMacArm64) return { index: 22, name: "mac_arm64_main(compile but not run)" };
-        if (isFreeBSD32) return { index: 23, name: "FreeBSD 32-bit (_start) (compile but not run)" }; // <--- الكشف التلقائي لـ FreeBSD 32
+        if (isFreeBSD32) return hasMain ? { index: 24, name: "FreeBSD 32-bit (main) (compile but not run)" } : { index: 23, name: "FreeBSD 32-bit (_start) (compile but not run)" }; // <--- الكشف التلقائي لـ FreeBSD 32 main و _start
         if (isArm64) return hasMain ? { index: 16, name: "Linux ARM64 (main)" } : { index: 14, name: "Linux ARM64 (_start)" }; 
         if (isArm32) return hasMain ? { index: 17, name: "Linux ARM32 (main)" } : { index: 15, name: "Linux ARM32 (_start)" }; 
         if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; 
@@ -546,7 +546,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "20) win_arm32_start(compile but not run)",
                 "21) win_arm32_main(compile but not run)",
                 "22) mac_arm64_main(compile but not run)",
-                "23) FreeBSD 32-bit (_start) (compile but not run)" // <--- الإضافة الجديدة لـ FreeBSD 32-bit
+                "23) FreeBSD 32-bit (_start) (compile but not run)",
+                "24) FreeBSD 32-bit (main) (compile but not run)" // <--- الإضافة الجديدة لـ FreeBSD 32-bit main
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -648,6 +649,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, 
                         `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
                     ]; break;
+                    case 24: commands = [ // <--- الإضافة الجديدة لـ FreeBSD 32-bit main (gcc branch)
+                        `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
+                        `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
+                        `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -722,6 +728,11 @@ export function activate(context: vscode.ExtensionContext) {
                     case 23: commands = [ // <--- الإضافة الجديدة لـ FreeBSD 32-bit (ld branch)
                         `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
                         `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, 
+                        `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
+                    ]; break;
+                    case 24: commands = [ // <--- الإضافة الجديدة لـ FreeBSD 32-bit main (ld branch)
+                        `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
+                        `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
                         `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
                     ]; break;
                 }

@@ -374,6 +374,32 @@
     ],
     "description": "Template for Linux ARM64 using _start (GNU Assembler)"
   },
+  "Linux ARM64 (main)": {
+    "prefix": "linux-arm64-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from ARM64 (main) on Arch Linux!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\t/* sys_write (x8 = 64) */",
+      "\tmov x8, #64         // رقم الـ syscall لعملية الكتابة",
+      "\tmov x0, #1          // stdout (المخرجات القياسية)",
+      "\tadrp x1, msg        // تحميل عنوان الرسالة (Page address)",
+      "\tadd x1, x1, :lo12:msg // تحميل الإزاحة (Offset)",
+      "\tmov x2, len         // طول الرسالة",
+      "\tsvc #0              // استدعاء النظام",
+      "",
+      "\t/* sys_exit (x8 = 93) */",
+      "\tmov x8, #93         // رقم الـ syscall للخروج",
+      "\tmov x0, #0          // كود الخروج 0",
+      "\tsvc #0"
+    ],
+    "description": "Template for Linux ARM64 using main (GNU Assembler)"
+  },
   "Linux ARM32 (_start)": {
     "prefix": "linux-arm32-start",
     "body": [

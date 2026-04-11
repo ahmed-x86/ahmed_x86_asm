@@ -338,7 +338,7 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
 
     if (platform === 'linux') {
         if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" }; // <--- الكشف التلقائي هنا
-        if (isWinArm32) return { index: 20, name: "win_arm32_start(compile but not run)" }; // <--- الكشف التلقائي لـ ARM32
+        if (isWinArm32) return hasMain ? { index: 21, name: "win_arm32_main(compile but not run)" } : { index: 20, name: "win_arm32_start(compile but not run)" }; // <--- الكشف التلقائي لـ ARM32
         if (isArm64) return hasMain ? { index: 16, name: "Linux ARM64 (main)" } : { index: 14, name: "Linux ARM64 (_start)" }; // إضافة وتعديل ARM64
         if (isArm32) return hasMain ? { index: 17, name: "Linux ARM32 (main)" } : { index: 15, name: "Linux ARM32 (_start)" }; // <--- إضافة التعديل هنا لـ ARM32 main
         if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه مع التمييز بين main و _start
@@ -539,7 +539,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "17) Linux ARM32 (main) (QEMU)",
                 "18) win_arm64_start(compile but not run)",
                 "19) win_arm64_main(compile but not run)",
-                "20) win_arm32_start(compile but not run)" // <--- الإضافة الجديدة هنا
+                "20) win_arm32_start(compile but not run)",
+                "21) win_arm32_main(compile but not run)" // <--- الإضافة الجديدة لـ Windows ARM32 main
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -622,9 +623,13 @@ export function activate(context: vscode.ExtensionContext) {
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
                         `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`
                     ]; break;
-                    case 20: commands = [ // <--- الإضافة الجديدة لـ Windows ARM32
+                    case 20: commands = [
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
                         `echo "\\nNote: We have breached the realms of architectures.. The code is sound 32-bit, but the atoms of your x86_64 processor still refuse to dance to the rhythms of ARM32 Windows."`
+                    ]; break;
+                    case 21: commands = [ // <--- الإضافة الجديدة لـ Windows ARM32 (main)
+                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
+                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device 😅"`
                     ]; break;
                 }
             } else {
@@ -687,9 +692,12 @@ export function activate(context: vscode.ExtensionContext) {
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
                         `echo "\\nNote: We have breached the realms of architectures.. The code is sound 32-bit, but the atoms of your x86_64 processor still refuse to dance to the rhythms of ARM32 Windows."`
                     ]; break;
+                    case 21: commands = [ // <--- الإضافة الجديدة لـ Windows ARM32 (main)
+                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
+                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device "`
+                    ]; break;
                 }
             }
-            // ----------------------------------------------------
         } else if (platform === 'win32') {
             options = [
                 `✨ Auto Detect: ${autoDetected.name}`,
@@ -730,10 +738,10 @@ export function activate(context: vscode.ExtensionContext) {
                 switch (selectedIndex) {
                     case 1: commands = [`C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -lkernel32 -luser32 --subsystem console --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
                     case 2: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
-                    case 3: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
+                    case 3: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
                     case 4: commands = [`C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -lkernel32 -luser32 -e _main --subsystem console --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
                     case 5: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e _main --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
-                    case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e main -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
+                    case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e main -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
                 }
             } else {
                 // أوامر الويندوز المقسمة (gcc)
@@ -746,7 +754,6 @@ export function activate(context: vscode.ExtensionContext) {
                     case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-emain'`, `.\\${baseName}.exe`]; break;
                 }
             }
-            // ----------------------------------------------------
         }
 
         if (commands.length > 0) {
@@ -875,7 +882,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(setLinuxLinkerDisposable);   
     context.subscriptions.push(runDisposable);
     context.subscriptions.push(hoverDisposable); 
-    context.subscriptions.push(toggleWineLogDisposable); // <--- تم تسجيل الأمر الجديد للـ Wine Log هنا
+    context.subscriptions.push(toggleWineLogDisposable); 
     context.subscriptions.push(showSettingsMenuDisposable);
 }
 export function deactivate() {}

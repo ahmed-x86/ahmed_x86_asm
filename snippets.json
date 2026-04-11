@@ -449,5 +449,42 @@
       "\tsvc #0"
     ],
     "description": "Template for Linux ARM32 using main (GNU Assembler)"
+  },
+  "win_arm64_start": {
+    "prefix": "win-arm64-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"hi i use arch btw by win-arm64\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".bss",
+      "\t.align 3",
+      "\twritten: .space 8",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\t/* محاذاة المكدس (Stack Alignment) بـ 16 بايت وهو شرط في بيئة Windows ARM64 */",
+      "\tsub sp, sp, #32",
+      "",
+      "\t/* استدعاء GetStdHandle(-11) */",
+      "\t/* -11 تعني STD_OUTPUT_HANDLE */",
+      "\tmov x0, -11",
+      "\tbl GetStdHandle",
+      "",
+      "\t/* استدعاء WriteConsoleA */",
+      "\t/* مقبض الشاشة (Handle) موجود مسبقاً في x0 لأنه ناتج الدالة السابقة */",
+      "\tldr x1, =msg        /* المعامل الثاني: عنوان النص */",
+      "\tldr x2, =len        /* المعامل الثالث: طول النص */",
+      "\tldr x3, =written    /* المعامل الرابع: متغير حفظ عدد البايتات المكتوبة */",
+      "\tmov x4, #0          /* المعامل الخامس: NULL */",
+      "\tbl WriteConsoleA",
+      "",
+      "\t/* استدعاء ExitProcess(0) */",
+      "\tmov x0, #0",
+      "\tbl ExitProcess"
+    ],
+    "description": "Template for Windows ARM64 using _start"
   }
 }

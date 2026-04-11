@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.3.6/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.3.7/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,6 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 
 ## ✨ Features
+- **⚓ FreeBSD 32-bit (main) Support (New in v1.3.7!)**: We went deeper! You can now cross-compile FreeBSD 32-bit Assembly using the C-style `main` entry point. It fully supports FreeBSD's unique stack-based syscall convention right from your Linux terminal.
 - **⚓ FreeBSD 32-bit (x86) Support (New in v1.3.6!)**: The BSD collection expands! You can now cross-compile FreeBSD 32-bit Assembly using the standard `_start` entry point with Stack-based Syscalls directly from Linux.
 - **🍎 macOS ARM64 (Apple Silicon) Support (New in v1.3.5!)**: The ultimate breach! You can now cross-compile macOS ARM64 Assembly using the C-style `_main` entry point and `libSystem`. Perfect for building for M1/M2/M3 chips directly from your Arch Linux machine.
 - **🦾 Windows ARM32 (main) Support (New in v1.3.4!)**: The ARM circle is now complete! You can now cross-compile Windows ARM32 (AArch32/armv7) Assembly using the C-style `main` entry point, allowing seamless integration with the C Runtime on 32-bit ARM hardware.
@@ -88,6 +89,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | `freebsd64-start` | FreeBSD 64-bit boilerplate using Raw Syscalls and `_start` |
 | `freebsd64-main` | FreeBSD 64-bit boilerplate using `main` |
 | `freebsd32-start` | FreeBSD 32-bit boilerplate using Stack Syscalls and `_start` |
+| `freebsd32-main` | FreeBSD 32-bit boilerplate using Stack Syscalls and `main` |
 
 ### 🍎 macOS (Mach-O) Templates
 | Prefix | Description |

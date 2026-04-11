@@ -454,6 +454,29 @@ export function activate(context: vscode.ExtensionContext) {
     });
     // ----------------------------------------------------
 
+    // --- الإضافة الجديدة: أمر للتحكم في عرض سجلات Wine ---
+    let toggleWineLogDisposable = vscode.commands.registerCommand('ahmed-x86-asm.toggleWineLog', async () => {
+        // الافتراضي هو false (أو undefined) مما يعني الكتم (OFF) لنظافة المخرجات
+        const isWineLogEnabled = context.globalState.get<boolean>('wineLogEnabled') === true;
+        const currentLabel = isWineLogEnabled ? 'ON' : 'OFF';
+
+        const options = [
+            { label: 'OFF', description: 'Hide Wine warnings and errors (Clean output, Recommended)' },
+            { label: 'ON', description: 'Show all Wine logs (Useful for deep debugging)' }
+        ];
+
+        const selection = await vscode.window.showQuickPick(options, {
+            placeHolder: `Set Wine Log Visibility | Current: ${currentLabel}`
+        });
+
+        if (selection) {
+            const newState = selection.label === 'ON';
+            await context.globalState.update('wineLogEnabled', newState);
+            vscode.window.showInformationMessage(`Wine Log is now set to: ${selection.label} 🍷`);
+        }
+    });
+    // ----------------------------------------------------
+
     // أمر التشغيل الرئيسي
     let runDisposable = vscode.commands.registerCommand('ahmed-x86-asm.run', async () => {
         
@@ -485,6 +508,10 @@ export function activate(context: vscode.ExtensionContext) {
 
         // استدعاء المسار لعرضه
         const currentIrvinePath = context.globalState.get<string>('irvineLibPath') || "Not Set";
+
+        // --- جلب حالة سجلات Wine لإضافتها إلى الأوامر ---
+        const wineLogEnabled = context.globalState.get<boolean>('wineLogEnabled') === true;
+        const wineSuffix = wineLogEnabled ? "" : " 2>/dev/null";
 
         if (platform === 'linux') {
             options = [
@@ -539,12 +566,12 @@ export function activate(context: vscode.ExtensionContext) {
                     case 2: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `gcc "${baseName}.o" -o "${baseName}" -no-pie`, `./"${baseName}"`]; break;
                     case 3: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `gcc -m32 "${baseName}.o" -o "${baseName}" -nostdlib`, `./"${baseName}"`]; break;
                     case 4: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `gcc -m32 "${baseName}.o" -o "${baseName}" -no-pie`, `./"${baseName}"`]; break;
-                    case 5: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 6: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 7: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 5: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 6: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 7: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
                     case 11: commands = [
                         `nasm -f macho64 "${fileName}" -o "${baseName}.o"`, 
                         `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, 
@@ -588,12 +615,12 @@ export function activate(context: vscode.ExtensionContext) {
                     case 2: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld -e main "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
                     case 3: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld -m elf_i386 "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
                     case 4: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld -m elf_i386 -e main "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
-                    case 5: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 6: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 7: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
-                    case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"`]; break;
+                    case 5: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 6: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 7: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
+                    case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
                     case 11: commands = [
                         `nasm -f macho64 "${fileName}" -o "${baseName}.o"`, 
                         `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, 
@@ -624,7 +651,7 @@ export function activate(context: vscode.ExtensionContext) {
                         `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, 
                         `qemu-aarch64-static ./"${baseName}"`
                     ]; break;
-                    case 17: commands = [
+                    case 17: commands = [ // <--- الإضافة الجديدة هنا
                         `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
                         `arm-none-eabi-ld "${baseName}.o" -o "${baseName}" -e main`, 
                         `qemu-arm-static ./"${baseName}"`
@@ -791,6 +818,7 @@ export function activate(context: vscode.ExtensionContext) {
             { label: '$(settings-gear) Open Extension Settings', description: 'Configure extension features (e.g., auto-cleanup)', command: 'settings' },
             { label: '$(package) Check Dependencies', description: 'Verify required ASM tools and packages', command: 'ahmed-x86-asm.checkDeps' },
             { label: '$(folder-opened) Reset Irvine Path', description: 'Clear the saved Irvine32 directory path', command: 'ahmed-x86-asm.resetIrvinePath' },
+            { label: '$(output) Toggle Wine Log', description: 'Show or hide Wine terminal warnings', command: 'ahmed-x86-asm.toggleWineLog' },
             { label: '$(wrench) Set Win32 Linker Method', description: 'Choose between ld or gcc for Windows linking', command: 'ahmed-x86-asm.setLinkerMethod' },
             { label: '$(refresh) Reset Win32 Linker Method', description: 'Let the extension auto-detect the Windows linker', command: 'ahmed-x86-asm.resetLinkerMethod' },
             { label: '$(wrench) Set Linux Linker Method', description: 'Choose between ld or gcc for Linux linking', command: 'ahmed-x86-asm.setLinuxLinkerMethod' },
@@ -809,7 +837,6 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
     });
-
     context.subscriptions.push(checkDepsDisposable);
     context.subscriptions.push(resetPathDisposable);
     context.subscriptions.push(resetLinkerDisposable); 
@@ -818,7 +845,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(setLinuxLinkerDisposable);   
     context.subscriptions.push(runDisposable);
     context.subscriptions.push(hoverDisposable); 
+    context.subscriptions.push(toggleWineLogDisposable); // <--- تم تسجيل الأمر الجديد للـ Wine Log هنا
     context.subscriptions.push(showSettingsMenuDisposable);
 }
-
 export function deactivate() {}

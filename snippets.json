@@ -633,5 +633,33 @@
       "\tret"
     ],
     "description": "Template for macOS ARM64 using main (Apple Silicon)"
+  },
+  "FreeBSD 32-bit (_start)": {
+    "prefix": "freebsd32-start",
+    "body": [
+      "section .data",
+      "\tmsg db \"Hello from FreeBSD 32-bit on Arch Linux!\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal _start",
+      "",
+      "_start:",
+      "\t; 1. sys_write (FreeBSD 32-bit expects args on stack)",
+      "\tpush dword len      ; arg 3: length",
+      "\tpush dword msg      ; arg 2: message pointer",
+      "\tpush dword 1        ; arg 1: stdout",
+      "\tpush dword 0        ; dummy return address",
+      "\tmov eax, 4          ; sys_write",
+      "\tint 0x80",
+      "\tadd esp, 16         ; clean up stack",
+      "",
+      "\t; 2. sys_exit",
+      "\tpush dword 0        ; arg 1: exit status",
+      "\tpush dword 0        ; dummy return address",
+      "\tmov eax, 1          ; sys_exit",
+      "\tint 0x80"
+    ],
+    "description": "Template for FreeBSD 32-bit using _start (Stack Syscalls)"
   }
 }

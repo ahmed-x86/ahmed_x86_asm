@@ -424,5 +424,30 @@
       "\tsvc #0"
     ],
     "description": "Template for Linux ARM32 using _start (GNU Assembler)"
+  },
+  "Linux ARM32 (main)": {
+    "prefix": "linux-arm32-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from ARM32 (main) on Arch Linux!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\t/* sys_write (r7 = 4) */",
+      "\tmov r7, #4          // رقم الـ syscall لعملية الكتابة في ARM32",
+      "\tmov r0, #1          // stdout (المخرجات القياسية)",
+      "\tldr r1, =msg        // تحميل عنوان الرسالة",
+      "\tldr r2, =len        // تحميل طول الرسالة",
+      "\tsvc #0              // استدعاء النظام",
+      "",
+      "\t/* sys_exit (r7 = 1) */",
+      "\tmov r7, #1          // رقم الـ syscall للخروج في ARM32",
+      "\tmov r0, #0          // كود الخروج 0",
+      "\tsvc #0"
+    ],
+    "description": "Template for Linux ARM32 using main (GNU Assembler)"
   }
 }

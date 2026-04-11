@@ -661,5 +661,36 @@
       "\tint 0x80"
     ],
     "description": "Template for FreeBSD 32-bit using _start (Stack Syscalls)"
+  },
+  "FreeBSD 32-bit (main)": {
+    "prefix": "freebsd32-main",
+    "body": [
+      "; freebsd32_main.asm - FreeBSD 32-bit using main",
+      "section .data",
+      "\tmsg db \"hi i use arch btw by freebsd32 (main)\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal main",
+      "",
+      "main:",
+      "\t; 1. sys_write (FreeBSD 32-bit expects args on stack)",
+      "\tpush dword len      ; المعامل الثالث: طول الرسالة",
+      "\tpush dword msg      ; المعامل الثاني: عنوان الرسالة",
+      "\tpush dword 1        ; المعامل الأول: stdout (1)",
+      "",
+      "\t; مساحة وهمية لعنوان العودة الخاص بالـ Syscall",
+      "\tpush dword 0",
+      "\tmov eax, 4          ; رقم أمر sys_write",
+      "\tint 0x80",
+      "\tadd esp, 16         ; تنظيف المكدس",
+      "",
+      "\t; 2. sys_exit",
+      "\tpush dword 0        ; حالة الخروج (Status = 0)",
+      "\tpush dword 0        ; مساحة وهمية لعنوان العودة",
+      "\tmov eax, 1          ; رقم أمر sys_exit",
+      "\tint 0x80"
+    ],
+    "description": "Template for FreeBSD 32-bit using main"
   }
 }

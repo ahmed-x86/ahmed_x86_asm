@@ -3,7 +3,7 @@
   "publisher": "ahmed-x86",
   "displayName": "ahmed-x86 asm",
   "description": "Powerful, all-in-one tool to instantly compile and run x86 ans ARM Assembly code. Supporting every possible ASM flavor!",
-  "version": "1.2.9",
+  "version": "1.3.0",
   "icon": "icon.png",
   "license": "GPL-3.0-or-later",
   "engines": {
@@ -58,6 +58,7 @@
     "onCommand:ahmed-x86-asm.setLinuxLinkerMethod",
     "onCommand:ahmed-x86-asm.resetLinuxLinkerMethod",
     "onCommand:ahmed-x86-asm.showSettingsMenu",
+    "onCommand:ahmed-x86-asm.toggleWineLog",
     "onLanguage:assembly",
     "onLanguage:asm",
     "onLanguage:masm",
@@ -159,6 +160,10 @@
         "command": "ahmed-x86-asm.showSettingsMenu",
         "title": "ahmed-x86 ASM: Settings & Tools",
         "icon": "$(info)"
+      },
+      {
+        "command": "ahmed-x86-asm.toggleWineLog",
+        "title": "Toggle Wine Log Visibility (ahmed_x86)"
       }
     ],
     "keybindings": [

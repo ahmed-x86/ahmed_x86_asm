@@ -331,19 +331,21 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const is64Bit = textLower.includes('bits 64') || textLower.includes('elf64') || textLower.includes('win64') || textLower.includes('rax');
     const isMac = textLower.includes('macho64');
     const isFreeBSD = textLower.includes('freebsd') || textLower.includes('fbsd'); // تعرف تلقائي لـ FreeBSD
+    const isFreeBSD32 = textLower.includes('freebsd32') || textLower.includes('fbsd32'); // <--- الإضافة الجديدة هنا لـ FreeBSD 32
     const isArm64 = textLower.includes('aarch64') || textLower.includes('x8'); // إضافة لـ ARM64
     const isArm32 = textLower.includes('r7') || textLower.includes('svc #0'); // إضافة لـ ARM32
-    const isWinArm64 = textLower.includes('win-arm64') || textLower.includes('windows arm64'); // <--- إضافة التميز لـ Windows ARM64
-    const isWinArm32 = textLower.includes('win-arm32') || textLower.includes('windows arm32'); // <--- إضافة التميز لـ Windows ARM32
-    const isMacArm64 = textLower.includes('mac-arm64') || textLower.includes('apple silicon'); // <--- إضافة التميز لـ macOS ARM64
+    const isWinArm64 = textLower.includes('win-arm64') || textLower.includes('windows arm64'); // إضافة التميز لـ Windows ARM64
+    const isWinArm32 = textLower.includes('win-arm32') || textLower.includes('windows arm32'); // إضافة التميز لـ Windows ARM32
+    const isMacArm64 = textLower.includes('mac-arm64') || textLower.includes('apple silicon'); // إضافة التميز لـ macOS ARM64
 
     if (platform === 'linux') {
-        if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" }; // <--- الكشف التلقائي هنا
-        if (isWinArm32) return hasMain ? { index: 21, name: "win_arm32_main(compile but not run)" } : { index: 20, name: "win_arm32_start(compile but not run)" }; // <--- الكشف التلقائي لـ ARM32
-        if (isMacArm64) return { index: 22, name: "mac_arm64_main(compile but not run)" }; // <--- الكشف التلقائي لـ macOS ARM64
-        if (isArm64) return hasMain ? { index: 16, name: "Linux ARM64 (main)" } : { index: 14, name: "Linux ARM64 (_start)" }; // إضافة وتعديل ARM64
-        if (isArm32) return hasMain ? { index: 17, name: "Linux ARM32 (main)" } : { index: 15, name: "Linux ARM32 (_start)" }; // <--- إضافة التعديل هنا لـ ARM32 main
-        if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه مع التمييز بين main و _start
+        if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" };
+        if (isWinArm32) return hasMain ? { index: 21, name: "win_arm32_main(compile but not run)" } : { index: 20, name: "win_arm32_start(compile but not run)" };
+        if (isMacArm64) return { index: 22, name: "mac_arm64_main(compile but not run)" };
+        if (isFreeBSD32) return { index: 23, name: "FreeBSD 32-bit (_start) (compile but not run)" }; // <--- الكشف التلقائي لـ FreeBSD 32
+        if (isArm64) return hasMain ? { index: 16, name: "Linux ARM64 (main)" } : { index: 14, name: "Linux ARM64 (_start)" }; 
+        if (isArm32) return hasMain ? { index: 17, name: "Linux ARM32 (main)" } : { index: 15, name: "Linux ARM32 (_start)" }; 
+        if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; 
         if (isMac) return { index: 11, name: "Mac64 Native (Darling)" };
         if (hasIrvine) return hasMain ? { index: 8, name: "Win32 Irvine (main)" } : { index: 5, name: "Win32 Irvine" };
         if (is64Bit) return hasMain ? { index: 2, name: "Linux64 Native (main)" } : { index: 1, name: "Linux64 Native (_start)" };
@@ -543,7 +545,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "19) win_arm64_main(compile but not run)",
                 "20) win_arm32_start(compile but not run)",
                 "21) win_arm32_main(compile but not run)",
-                "22) mac_arm64_main(compile but not run)" // <--- الإضافة الجديدة هنا لـ macOS ARM64
+                "22) mac_arm64_main(compile but not run)",
+                "23) FreeBSD 32-bit (_start) (compile but not run)" // <--- الإضافة الجديدة لـ FreeBSD 32-bit
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -640,6 +643,11 @@ export function activate(context: vscode.ExtensionContext) {
                             `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`
                         ];
                         break;
+                    case 23: commands = [ // <--- الإضافة الجديدة لـ FreeBSD 32-bit (gcc branch)
+                        `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
+                        `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, 
+                        `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -691,11 +699,11 @@ export function activate(context: vscode.ExtensionContext) {
                     ]; break;
                     case 18: commands = [
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
-                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device "`
+                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`
                     ]; break;
                     case 19: commands = [
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
-                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device "`
+                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`
                     ]; break;
                     case 20: commands = [
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
@@ -703,7 +711,7 @@ export function activate(context: vscode.ExtensionContext) {
                     ]; break;
                     case 21: commands = [
                         `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
-                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device "`
+                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device 😅"`
                     ]; break;
                     case 22:
                         commands = [
@@ -711,9 +719,13 @@ export function activate(context: vscode.ExtensionContext) {
                             `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`
                         ];
                         break;
+                    case 23: commands = [ // <--- الإضافة الجديدة لـ FreeBSD 32-bit (ld branch)
+                        `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
+                        `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, 
+                        `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
+                    ]; break;
                 }
             }
-            // ----------------------------------------------------
         } else if (platform === 'win32') {
             options = [
                 `✨ Auto Detect: ${autoDetected.name}`,
@@ -754,10 +766,10 @@ export function activate(context: vscode.ExtensionContext) {
                 switch (selectedIndex) {
                     case 1: commands = [`C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -lkernel32 -luser32 --subsystem console --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
                     case 2: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
-                    case 3: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
+                    case 3: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
                     case 4: commands = [`C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -lkernel32 -luser32 -e _main --subsystem console --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
                     case 5: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e _main --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
-                    case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e main -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
+                    case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e main -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
                 }
             } else {
                 // أوامر الويندوز المقسمة (gcc)

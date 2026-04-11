@@ -35,6 +35,7 @@ To bypass the dead SDK links, we manually build `osxcross` using a modern SDK (1
 ### 1. Install Essential Dependencies
 ```bash
 sudo pacman -S --needed clang cmake libxml2 zlib openssl pbzip2 mpdecimal
+sudo pacman -S lld
 ```
 
 ### 2. Clone the Official Repository

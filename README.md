@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.2.9/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.3.0/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -26,6 +26,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 
 ## ✨ Features
 
+- **🍷 Smart Wine Log Control (New in v1.3.0!)**: Say goodbye to annoying GPU and Mesa warnings when running Windows apps on Linux! You can now easily toggle Wine logs (ON/OFF) directly from the Tools & Settings menu for a perfectly clean terminal output.
 - **🦾 Linux ARM32 (main) Support (New in v1.2.9!)**: Complete the set! You can now compile and run ARM32 (AArch32) Assembly using the C-style `main` entry point seamlessly, completing the ARM support lineup.
 - **🦾 Linux ARM64 (main) Support (New in v1.2.8!)**: Full flexibility! You can now compile and run ARM64 Assembly using the C-style `main` entry point seamlessly, in addition to the standard `_start`.
 - **🚀 Universal Assembly Mode Support (New in v1.2.7!)**: Total freedom! The extension now supports and detects almost every Assembly flavor, including **MASM (case-insensitive)**, **FASM**, **MIPS**, **UASM**, and **RISC-V**. Even if you manually change the language mode in the status bar or use other ASM extensions, the "Run" and "Info" buttons will stay active and ready to work.
@@ -53,6 +54,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 You can access these features at any time via the **new Tools & Settings button (ℹ️)** next to the Play button, or via the Command Palette (`Ctrl + Shift + P`):
 
 - `ahmed-x86 ASM: Settings & Tools`: Opens the unified interactive menu to manage all extension features.
+- `Toggle Wine Log Visibility`: Show or hide Wine terminal warnings directly from the settings menu.
 - `Check ASM Dependencies (ahmed_x86)`: Scans your system to verify tools like `nasm`, `gcc`, `wine`, `darling`, `lld`, `aarch64-linux-gnu-as`, and `arm-none-eabi-as`.
 - `Reset Irvine Library Path`: Clears your saved Irvine directory path.
 - `Change Linux/Win32 Linker Method`: Manually switch between `ld` and `gcc`.
@@ -66,7 +68,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 ### 🦾 ARM Templates
 | Prefix | Description |
 | :--- | :--- |
-| `linux-arm32-main` | **(New in v1.2.9!)** Linux ARM32 (AArch32) boilerplate using `main` |
+| `linux-arm32-main` | Linux ARM32 (AArch32) boilerplate using `main` |
 | `linux-arm64-main` | Linux ARM64 (AArch64) boilerplate using `main` |
 | `linux-arm32-start` | Linux ARM32 (AArch32) boilerplate using GNU Assembler (GAS) |
 | `linux-arm64-start` | Linux ARM64 (AArch64) boilerplate using GNU Assembler (GAS) |

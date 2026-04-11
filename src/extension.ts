@@ -335,7 +335,7 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isArm32 = textLower.includes('r7') || textLower.includes('svc #0'); // إضافة لـ ARM32
 
     if (platform === 'linux') {
-        if (isArm64) return { index: 14, name: "Linux ARM64 (_start)" }; // إضافة ARM64
+        if (isArm64) return hasMain ? { index: 16, name: "Linux ARM64 (main)" } : { index: 14, name: "Linux ARM64 (_start)" }; // إضافة وتعديل ARM64
         if (isArm32) return { index: 15, name: "Linux ARM32 (_start)" }; // إضافة ARM32
         if (isFreeBSD) return hasMain ? { index: 13, name: "FreeBSD 64-bit (main)" } : { index: 12, name: "FreeBSD 64-bit (_start)" }; // أولوية FreeBSD إذا تم اكتشافه مع التمييز بين main و _start
         if (isMac) return { index: 11, name: "Mac64 Native (Darling)" };
@@ -503,7 +503,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "12) FreeBSD 64-bit (_start) (QEMU)",
                 "13) FreeBSD 64-bit (main) (QEMU)",
                 "14) Linux ARM64 (_start) (QEMU)", 
-                "15) Linux ARM32 (_start) (QEMU)" // الإضافة الجديدة لـ ARM32
+                "15) Linux ARM32 (_start) (QEMU)",
+                "16) Linux ARM64 (main) (QEMU)"
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -568,6 +569,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `arm-none-eabi-ld "${baseName}.o" -o "${baseName}"`, 
                         `qemu-arm-static ./"${baseName}"`
                     ]; break;
+                    case 16: commands = [
+                        `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
+                        `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, 
+                        `qemu-aarch64-static ./"${baseName}"`
+                    ]; break;
                 }
             } else {
                 // أوامر لينكس المقسمة (باستخدام ld القياسي)
@@ -606,6 +612,11 @@ export function activate(context: vscode.ExtensionContext) {
                         `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
                         `arm-none-eabi-ld "${baseName}.o" -o "${baseName}"`, 
                         `qemu-arm-static ./"${baseName}"`
+                    ]; break;
+                    case 16: commands = [
+                        `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
+                        `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, 
+                        `qemu-aarch64-static ./"${baseName}"`
                     ]; break;
                 }
             }
@@ -733,7 +744,6 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // --- الإضافة الجديدة (v1.1.8): قراءة ملف .err عند وقوف الماوس على الخطأ ---
     let hoverDisposable = vscode.languages.registerHoverProvider(
         [{ scheme: 'file', language: 'assembly' }, { scheme: 'file', pattern: '**/*.{asm,s,S,inc,nasm,masm,uasm}' }],
         {
@@ -757,7 +767,6 @@ export function activate(context: vscode.ExtensionContext) {
                                 return new vscode.Hover(markdown);
                             }
                         } catch (e) {
-                            // تجاهل الخطأ بصمت
                         }
                     }
                 }
@@ -766,7 +775,6 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-    // --- الإضافة الجديدة للتحديث 1.2.1: قائمة الإعدادات والأدوات المجمعة ---
     let showSettingsMenuDisposable = vscode.commands.registerCommand('ahmed-x86-asm.showSettingsMenu', async () => {
         const options = [
             { label: '$(settings-gear) Open Extension Settings', description: 'Configure extension features (e.g., auto-cleanup)', command: 'settings' },
@@ -784,16 +792,13 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (selection) {
             if (selection.command === 'settings') {
-                // فتح إعدادات الإضافة مباشرة في محرر VS Code
                 vscode.commands.executeCommand('workbench.action.openSettings', 'ahmed-x86-asm');
             } else {
-                // تشغيل الأمر الذي تم اختياره من القائمة
                 vscode.commands.executeCommand(selection.command);
             }
         }
     });
 
-    // تسجيل الأوامر معاً
     context.subscriptions.push(checkDepsDisposable);
     context.subscriptions.push(resetPathDisposable);
     context.subscriptions.push(resetLinkerDisposable); 

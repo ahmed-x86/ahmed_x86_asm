@@ -91,6 +91,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | Prefix | Description |
 | :--- | :--- |
 | `mac64-main` | macOS 64-bit boilerplate using Apple official `_main` and `libSystem` |
+| `mac-arm64-main` | macOS ARM64 (Apple Silicon) boilerplate using `_main` |
 
 ### 🐧 Linux Native Templates
 | Prefix | Description |

@@ -26,6 +26,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 
 ## ✨ Features
 
+- **🪟 Windows ARM64 Cross-Compilation (New!)**: The ultimate flex! You can now cross-compile Windows ARM64 Assembly directly from your Linux machine. It compiles perfectly, but outputs a fun physics reminder since you can't natively run it on x86_64!
 - **🍷 Smart Wine Log Control (New in v1.3.0!)**: Say goodbye to annoying GPU and Mesa warnings when running Windows apps on Linux! You can now easily toggle Wine logs (ON/OFF) directly from the Tools & Settings menu for a perfectly clean terminal output.
 - **🦾 Linux ARM32 (main) Support (New in v1.2.9!)**: Complete the set! You can now compile and run ARM32 (AArch32) Assembly using the C-style `main` entry point seamlessly, completing the ARM support lineup.
 - **🦾 Linux ARM64 (main) Support (New in v1.2.8!)**: Full flexibility! You can now compile and run ARM64 Assembly using the C-style `main` entry point seamlessly, in addition to the standard `_start`.
@@ -40,7 +41,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 - **💡 Smart Hover Logs (Added in v1.1.8)**: Say goodbye to opening separate `.err` files! Simply hover your mouse over the red error squiggles in your code, and an elegant pop-up will instantly display the complete compiler error log.
 - **📜 Transparent Build Logging & Error Prevention (Added in v1.1.7)**: See exactly what's happening under the hood! The extension logs every build command directly to the terminal for full transparency. 
 - **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler in the background, highlighting the exact word with a red squiggle and a custom gutter icon. Now supporting NASM, UASM, and GAS (for ARM).
-- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `svc #0`, `freebsd`, `macho64`, `irvine32`, `elf64`) to instantly recommend the perfect build mode.
+- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `svc #0`, `freebsd`, `macho64`, `irvine32`, `elf64`, `win-arm64`) to instantly recommend the perfect build mode.
 - **🎛️ Manual Win32/Linux Linker Override**: Full manual control to switch between `ld` and `gcc` linkers to ensure maximum stability.
 - **🖥️ Sequential Terminal Execution**: Commands are sent sequentially to the terminal for a cleaner output and easier debugging.
 - **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine, darling, lld, qemu, aarch64-linux-gnu-binutils, arm-none-eabi-binutils) are installed. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html).**
@@ -99,6 +100,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | `win32-std-start` | Win32 pure Windows API using `_start` |
 | `win64-std-main` | Win64 pure Windows API using `main` |
 | `win64-std-start` | Win64 pure Windows API using `_start` |
+| `win-arm64-start` | Windows ARM64 boilerplate using `_start` (Cross-compile only) |
 
 ---
 
@@ -109,8 +111,9 @@ Ensure your system has the following dependencies installed:
 - `nasm`, `uasm`, `binutils` (ld), `mingw-w64-gcc`, `wine`.
 - **For macOS support:** `osxcross` (linker) and `darling` (runner).
 - **For FreeBSD support:** `lld` (linker) and `qemu-user-static` (runner).
-- **For ARM64 support:** `aarch64-linux-gnu-binutils` and `qemu-aarch64-static`.
-- **For ARM32 support:** `arm-none-eabi-binutils` and `qemu-arm-static`.
+- **For Linux ARM64 support:** `aarch64-linux-gnu-binutils` and `qemu-aarch64-static`.
+- **For Linux ARM32 support:** `arm-none-eabi-binutils` and `qemu-arm-static`.
+- **For Windows ARM64 support:** `llvm-mingw-w64-toolchain-ucrt-bin` (AUR).
 
 ### 🪟 For Windows Users:
 Ensure your system has an **MSYS2** environment set up with:
@@ -121,7 +124,7 @@ Ensure your system has an **MSYS2** environment set up with:
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `linux-arm32-main` or `linux-arm64-main`) and press `Tab`.
+2. Type a snippet prefix (e.g., `linux-arm32-main` or `win-arm64-start`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!

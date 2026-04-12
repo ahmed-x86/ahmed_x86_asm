@@ -25,7 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 
 ## ✨ Features
-- **🪐 Linux RISC-V 64-bit Support (New in v1.3.8!)**: Enter the future of open hardware! You can now cross-compile and run RISC-V 64-bit Linux Assembly using the `_start` entry point directly from your Linux machine using `qemu-riscv64-static`.
+- **🪐 Linux RISC-V 64-bit Support (New in v1.3.8!)**: Enter the future of open hardware! You can now cross-compile and run RISC-V 64-bit Linux Assembly using the `_start`& `main` entry point directly from your Linux machine using `qemu-riscv64-static`.
 - **⚓ FreeBSD 32-bit (main) Support (New in v1.3.7!)**: We went deeper! You can now cross-compile FreeBSD 32-bit Assembly using the C-style `main` entry point. It fully supports FreeBSD's unique stack-based syscall convention right from your Linux terminal.
 - **⚓ FreeBSD 32-bit (x86) Support (New in v1.3.6!)**: The BSD collection expands! You can now cross-compile FreeBSD 32-bit Assembly using the standard `_start` entry point with Stack-based Syscalls directly from Linux.
 - **🍎 macOS ARM64 (Apple Silicon) Support (New in v1.3.5!)**: The ultimate breach! You can now cross-compile macOS ARM64 Assembly using the C-style `_main` entry point and `libSystem`. Perfect for building for M1/M2/M3 chips directly from your Arch Linux machine.
@@ -76,6 +76,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | Prefix | Description |
 | :--- | :--- |
 | `linux-riscv64-start` | Linux RISC-V 64-bit boilerplate using GNU Assembler (GAS) |
+| `linux-riscv64-main` | Linux RISC-V 64-bit boilerplate using GNU Assembler (GAS) |
 
 ### 🦾 ARM Templates
 | Prefix | Description |

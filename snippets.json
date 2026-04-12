@@ -778,5 +778,28 @@
       "\tecall"
     ],
     "description": "Template for Linux RISC-V 32-bit Embedded (RV32E) using main (No C-Lib)"
+  },
+  "Linux RV128 (_start)": {
+    "prefix": "linux-riscv128-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 128-bit Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\tli a7, 93",
+      "\tli a0, 0",
+      "\tecall"
+    ],
+    "description": "Template for Linux RISC-V 128-bit using _start"
   }
 }

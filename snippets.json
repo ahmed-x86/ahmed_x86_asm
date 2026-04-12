@@ -801,5 +801,26 @@
       "\tecall"
     ],
     "description": "Template for Linux RISC-V 128-bit using _start"
+  },
+  "Linux RV128 (main)": {
+    "prefix": "linux-riscv128-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 128-bit Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "\tli a0, 0",
+      "\tret"
+    ],
+    "description": "Template for Linux RISC-V 128-bit using main"
   }
 }

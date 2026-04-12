@@ -669,7 +669,6 @@ export function activate(context: vscode.ExtensionContext) {
                     ]; break;
                     case 26: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit main
                         `riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`,
-                        `echo "Compilation & Linking done!"`,
                         `qemu-riscv64-static ./"${baseName}"`
                     ]; break;
                 }
@@ -760,7 +759,6 @@ export function activate(context: vscode.ExtensionContext) {
                     ]; break;
                     case 26: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit main
                         `riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`,
-                        `echo "Compilation & Linking done!"`,
                         `qemu-riscv64-static ./"${baseName}"`
                     ]; break;
                 }

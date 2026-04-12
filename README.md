@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.4.5/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.4.6/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20RISC-V%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,6 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 
 ## ✨ Features
+- **🪐 Linux RISC-V 128-bit (main) Support (New in v1.4.6!)**: Pushing the limits even further! You can now cross-compile experimental RISC-V 128-bit (RV128) Linux Assembly using the C-style `main` entry point. It seamlessly links with the C Runtime using GCC and runs via QEMU directly from your terminal.
 - **🪐 Linux RISC-V 128-bit Support (New in v1.4.5!)**: Pushing the boundaries of architecture! You can now cross-compile and run experimental RISC-V 128-bit (RV128) Linux Assembly using the standard `_start` entry point directly from your Linux machine.
 - **🧹 Clean Snippets Logic (New in v1.4.4!)**: Speed up your workflow! All built-in templates have been decluttered by removing inline comments. You now get pure, production-ready code instantly upon pressing Tab, keeping your workspace professional and distraction-free.
 - **🪐 Linux RISC-V 32-bit Embedded (RV32E) Support (Updated in v1.4.3!)**: The embedded suite is complete! You can now cross-compile and run RV32E Linux Assembly using both `_start` and C-style `main` entry points. It features specialized logic to handle the 16-register constraint and `ilp32e` ABI syscall conventions.
@@ -81,6 +82,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | Prefix | Description |
 | :--- | :--- |
 | `linux-riscv128-start` | Linux RISC-V 128-bit (RV128) boilerplate using GNU Assembler (GAS) |
+| `linux-riscv128-main` | Linux RISC-V 128-bit (RV128) boilerplate using `main` |
 | `linux-riscv64-start` | Linux RISC-V 64-bit boilerplate using GNU Assembler (GAS) |
 | `linux-riscv64-main` | Linux RISC-V 64-bit boilerplate using `main` entry point |
 | `linux-riscv32-start` | Linux RISC-V 32-bit (RV32I) boilerplate using GNU Assembler (GAS) |
@@ -153,7 +155,7 @@ Ensure your system has an **MSYS2** environment set up with:
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `linux-riscv128-start` or `linux-arm32-main`) and press `Tab`.
+2. Type a snippet prefix (e.g., `linux-riscv128-main` or `linux-arm32-main`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!

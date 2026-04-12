@@ -324,9 +324,7 @@ async function detectBestWin32Linker(context: vscode.ExtensionContext): Promise<
         return bestMethod;
     });
 }
-// --------------------------------------------------------------------------
 
-// دالة ذكية لتحليل الكود وتوقع خيار التشغيل المناسب
 function detectBestOption(fileText: string, platform: string): { index: number, name: string } {
     const textLower = fileText.toLowerCase();
     

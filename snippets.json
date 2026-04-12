@@ -765,5 +765,30 @@
       "\tecall               # Environment Call (Syscall)"
     ],
     "description": "Template for Linux RISC-V 32-bit (RV32I) using _start"
+  },
+  "Linux RV32I (main)": {
+    "prefix": "linux-riscv32-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Success: RISC-V 32-bit (RV32I) using main works!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\t/* sys_write (a7 = 64) */",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\t/* sys_exit (a7 = 93) */",
+      "\tli a7, 93",
+      "\tli a0, 0",
+      "\tecall"
+    ],
+    "description": "Template for Linux RISC-V 32-bit (RV32I) using main (No C-Lib)"
   }
 }

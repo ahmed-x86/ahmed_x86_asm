@@ -348,7 +348,7 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isRiscv128 = textLower.includes('rv128') || textLower.includes('riscv128');
 
     if (platform === 'linux') {
-        if (isRiscv128) return { index: 31, name: "Linux RISC-V 128-bit (_start) (QEMU)" }; 
+        if (isRiscv128) return hasMain ? { index: 32, name: "Linux RISC-V 128-bit (main) (QEMU)" } : { index: 31, name: "Linux RISC-V 128-bit (_start) (QEMU)" }; 
         if (isRiscv32e) return hasMain ? { index: 30, name: "Linux RV32E (main) (QEMU)" } : { index: 29, name: "Linux RV32E (_start) (QEMU)" }; 
         if (isRiscv32) return hasMain ? { index: 28, name: "Linux RV32I (main) (QEMU)" } : { index: 27, name: "Linux RV32I (_start) (QEMU)" }; 
         if (isRiscv64) return hasMain ? { index: 26, name: "Linux RISC-V 64-bit (main) (QEMU)" } : { index: 25, name: "Linux RISC-V 64-bit (_start) (QEMU)" };
@@ -567,7 +567,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "28) Linux RV32I (main) (QEMU)",
                 "29) Linux RV32E (_start) (QEMU)",
                 "30) Linux RV32E (main) (QEMU)",
-                "31) Linux RISC-V 128-bit (_start) (QEMU)"
+                "31) Linux RISC-V 128-bit (_start) (QEMU)",
+                "32) Linux RISC-V 128-bit (main) (QEMU)"
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -624,6 +625,7 @@ export function activate(context: vscode.ExtensionContext) {
                     case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
                     case 30: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
                     case 31: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-riscv64 ./"${baseName}"`]; break;
+                    case 32: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-gcc -static "${baseName}.o" -o "${baseName}"`, `qemu-riscv64 ./"${baseName}"`]; break;
                 }
             } else {
                 switch (selectedIndex) {
@@ -658,6 +660,7 @@ export function activate(context: vscode.ExtensionContext) {
                     case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
                     case 30: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
                     case 31: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-riscv64 ./"${baseName}"`]; break;
+                    case 32: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-gcc -static "${baseName}.o" -o "${baseName}"`, `qemu-riscv64 ./"${baseName}"`]; break;
                 }
             }
         } else if (platform === 'win32') {

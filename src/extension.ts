@@ -341,13 +341,15 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isWinArm32 = textLower.includes('win-arm32') || textLower.includes('windows arm32');
     const isMacArm64 = textLower.includes('mac-arm64') || textLower.includes('apple silicon');
     
-    // تمييز RISC-V 32-bit عن RISC-V 64-bit وعن RV32E
+    // تمييز RISC-V 32-bit عن RISC-V 64-bit وعن RV32E و RV128
     const isRiscv32e = textLower.includes('rv32e');
     const isRiscv32 = (textLower.includes('rv32i') || textLower.includes('riscv32')) && !isRiscv32e;
     const isRiscv64 = (textLower.includes('riscv64') || textLower.includes('ecall')) && !isRiscv32 && !isRiscv32e;
+    const isRiscv128 = textLower.includes('rv128') || textLower.includes('riscv128');
 
     if (platform === 'linux') {
-        if (isRiscv32e) return hasMain ? { index: 30, name: "Linux RV32E (main) (QEMU)" } : { index: 29, name: "Linux RV32E (_start) (QEMU)" }; // <--- الكشف التلقائي لـ RV32E
+        if (isRiscv128) return { index: 31, name: "Linux RISC-V 128-bit (_start) (QEMU)" }; 
+        if (isRiscv32e) return hasMain ? { index: 30, name: "Linux RV32E (main) (QEMU)" } : { index: 29, name: "Linux RV32E (_start) (QEMU)" }; 
         if (isRiscv32) return hasMain ? { index: 28, name: "Linux RV32I (main) (QEMU)" } : { index: 27, name: "Linux RV32I (_start) (QEMU)" }; 
         if (isRiscv64) return hasMain ? { index: 26, name: "Linux RISC-V 64-bit (main) (QEMU)" } : { index: 25, name: "Linux RISC-V 64-bit (_start) (QEMU)" };
         if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" };
@@ -564,7 +566,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "27) Linux RV32I (_start) (QEMU)",
                 "28) Linux RV32I (main) (QEMU)",
                 "29) Linux RV32E (_start) (QEMU)",
-                "30) Linux RV32E (main) (QEMU)"
+                "30) Linux RV32E (main) (QEMU)",
+                "31) Linux RISC-V 128-bit (_start) (QEMU)"
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -620,6 +623,7 @@ export function activate(context: vscode.ExtensionContext) {
                     case 28: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
                     case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
                     case 30: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
+                    case 31: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-riscv64 ./"${baseName}"`]; break;
                 }
             } else {
                 switch (selectedIndex) {
@@ -653,6 +657,7 @@ export function activate(context: vscode.ExtensionContext) {
                     case 28: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
                     case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
                     case 30: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
+                    case 31: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-riscv64 ./"${baseName}"`]; break;
                 }
             }
         } else if (platform === 'win32') {

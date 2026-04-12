@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.4.4/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.4.5/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20RISC-V%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,6 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 
 ## ✨ Features
+- **🪐 Linux RISC-V 128-bit Support (New in v1.4.5!)**: Pushing the boundaries of architecture! You can now cross-compile and run experimental RISC-V 128-bit (RV128) Linux Assembly using the standard `_start` entry point directly from your Linux machine.
 - **🧹 Clean Snippets Logic (New in v1.4.4!)**: Speed up your workflow! All built-in templates have been decluttered by removing inline comments. You now get pure, production-ready code instantly upon pressing Tab, keeping your workspace professional and distraction-free.
 - **🪐 Linux RISC-V 32-bit Embedded (RV32E) Support (Updated in v1.4.3!)**: The embedded suite is complete! You can now cross-compile and run RV32E Linux Assembly using both `_start` and C-style `main` entry points. It features specialized logic to handle the 16-register constraint and `ilp32e` ABI syscall conventions.
 - **🪐 Linux RISC-V 32-bit (main) Support (New in v1.4.1!)**: The RISC-V circle is complete! You can now cross-compile and run RISC-V 32-bit (RV32I) Linux Assembly using the C-style `main` entry point. Utilizing a smart linking workaround, it bypasses 32/64-bit libc conflicts flawlessly on Linux!
@@ -51,7 +52,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 - **💡 Smart Hover Logs (Added in v1.1.8)**: Say goodbye to opening separate `.err` files! Simply hover your mouse over the red error squiggles in your code, and an elegant pop-up will instantly display the complete compiler error log.
 - **📜 Transparent Build Logging & Error Prevention (Added in v1.1.7)**: See exactly what's happening under the hood! The extension logs every build command directly to the terminal for full transparency. 
 - **🔍 Inline Error Diagnostics (Added in v1.1.5)**: A built-in intelligent linter that runs the assembler in the background, highlighting the exact word with a red squiggle and a custom gutter icon. Now supporting NASM, UASM, and GAS (for ARM and RISC-V).
-- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `svc #0`, `ecall`, `riscv64`, `rv32i`, `rv32e`, `freebsd`, `macho64`, `irvine32`, `win-arm64`) to instantly recommend the perfect build mode.
+- **🤖 Smart Auto-Detect**: Automatically analyzes your code keywords (like `svc #0`, `ecall`, `riscv64`, `rv32i`, `rv32e`, `rv128`, `freebsd`, `macho64`, `irvine32`, `win-arm64`) to instantly recommend the perfect build mode.
 - **🎛️ Manual Win32/Linux Linker Override**: Full manual control to switch between `ld` and `gcc` linkers to ensure maximum stability.
 - **🖥️ Sequential Terminal Execution**: Commands are sent sequentially to the terminal for a cleaner output and easier debugging.
 - **📦 Smart Dependency Checker (Enhanced)**: Automatically verifies if required tools (nasm, gcc, uasm, wine, darling, lld, qemu, cross-compilers) are installed. **If any tool is missing, it automatically opens the [Installation Guide](https://ahmed-x86.github.io/ahmed_x86_asm.html).**
@@ -79,6 +80,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 ### 🪐 RISC-V Templates
 | Prefix | Description |
 | :--- | :--- |
+| `linux-riscv128-start` | Linux RISC-V 128-bit (RV128) boilerplate using GNU Assembler (GAS) |
 | `linux-riscv64-start` | Linux RISC-V 64-bit boilerplate using GNU Assembler (GAS) |
 | `linux-riscv64-main` | Linux RISC-V 64-bit boilerplate using `main` entry point |
 | `linux-riscv32-start` | Linux RISC-V 32-bit (RV32I) boilerplate using GNU Assembler (GAS) |
@@ -139,7 +141,7 @@ Ensure your system has the following dependencies installed:
 - **For FreeBSD support:** `lld` (linker) and `qemu-user-static` (runner).
 - **For Linux ARM64 support:** `aarch64-linux-gnu-binutils` and `qemu-aarch64-static`.
 - **For Linux ARM32 support:** `arm-none-eabi-binutils` and `qemu-arm-static`.
-- **For Linux RISC-V 64/32-bit support:** `riscv64-linux-gnu-binutils`, `riscv64-linux-gnu-gcc`, `qemu-riscv64-static`, and `qemu-riscv32-static`. *(Note: The 64-bit RISC-V tools natively support assembling and linking for 32-bit via specific flags used by this extension).*
+- **For Linux RISC-V support:** `riscv64-linux-gnu-binutils`, `riscv64-linux-gnu-gcc`, `qemu-riscv64-static`, and `qemu-riscv32-static`. *(Note: The 64-bit RISC-V tools natively support assembling and linking for 32-bit and 128-bit experimental environments via specific flags).*
 - **For Windows ARM (64/32) support:** `llvm-mingw-w64-toolchain-ucrt-bin` (AUR).
 
 ### 🪟 For Windows Users:
@@ -151,7 +153,7 @@ Ensure your system has an **MSYS2** environment set up with:
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `linux-riscv32e-main` or `linux-arm32-main`) and press `Tab`.
+2. Type a snippet prefix (e.g., `linux-riscv128-start` or `linux-arm32-main`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!

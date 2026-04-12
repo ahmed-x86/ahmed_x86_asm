@@ -188,6 +188,7 @@ async function checkDependencies(platform: string) {
                 { name: 'arm-none-eabi-as', cmd: 'arm-none-eabi-as --version' }, // إضافة فحص ARM32
                 { name: 'qemu-arm-static', cmd: 'qemu-arm-static --version' }, // إضافة فحص ARM32
                 { name: 'riscv64-as', cmd: 'riscv64-linux-gnu-as --version' }, // إضافة فحص RISC-V 64
+                { name: 'riscv64-gcc', cmd: 'riscv64-linux-gnu-gcc --version' }, // <--- الإضافة الجديدة فحص GCC لـ RISC-V 64
                 { name: 'riscv64-ld', cmd: 'riscv64-linux-gnu-ld -v' }, // إضافة فحص RISC-V 64
                 { name: 'qemu-riscv64-static', cmd: 'qemu-riscv64-static --version' } // إضافة فحص RISC-V 64 محاكي
             ];
@@ -343,7 +344,7 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isRiscv64 = textLower.includes('riscv64') || textLower.includes('ecall'); // إضافة لـ RISC-V 64
 
     if (platform === 'linux') {
-        if (isRiscv64) return { index: 25, name: "Linux RISC-V 64-bit (_start) (QEMU)" }; // <--- دعم _start فقط حالياً
+        if (isRiscv64) return hasMain ? { index: 26, name: "Linux RISC-V 64-bit (main) (QEMU)" } : { index: 25, name: "Linux RISC-V 64-bit (_start) (QEMU)" }; // <--- تم التعديل لدعم main و _start
         if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" };
         if (isWinArm32) return hasMain ? { index: 21, name: "win_arm32_main(compile but not run)" } : { index: 20, name: "win_arm32_start(compile but not run)" };
         if (isMacArm64) return { index: 22, name: "mac_arm64_main(compile but not run)" };
@@ -553,7 +554,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "22) mac_arm64_main(compile but not run)",
                 "23) FreeBSD 32-bit (_start) (compile but not run)",
                 "24) FreeBSD 32-bit (main) (compile but not run)", 
-                "25) Linux RISC-V 64-bit (_start) (QEMU)"         // <--- الإضافة الجديدة لـ RISC-V 64-bit _start فقط
+                "25) Linux RISC-V 64-bit (_start) (QEMU)",
+                "26) Linux RISC-V 64-bit (main) (QEMU)" 
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -650,19 +652,24 @@ export function activate(context: vscode.ExtensionContext) {
                             `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`
                         ];
                         break;
-                    case 23: commands = [ // <--- الإضافة الجديدة لـ FreeBSD 32-bit (gcc branch)
+                    case 23: commands = [
                         `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
                         `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, 
                         `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
                     ]; break;
-                    case 24: commands = [ // <--- الإضافة الجديدة لـ FreeBSD 32-bit main (gcc branch)
+                    case 24: commands = [
                         `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
                         `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
                         `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
                     ]; break;
-                    case 25: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit _start
+                    case 25: commands = [
                         `riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`,
                         `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`,
+                        `qemu-riscv64-static ./"${baseName}"`
+                    ]; break;
+                    case 26: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit main
+                        `riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`,
+                        `echo "Compilation & Linking done!"`,
                         `qemu-riscv64-static ./"${baseName}"`
                     ]; break;
                 }
@@ -736,19 +743,24 @@ export function activate(context: vscode.ExtensionContext) {
                             `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`
                         ];
                         break;
-                    case 23: commands = [ // <--- الإضافة الجديدة لـ FreeBSD 32-bit (ld branch)
+                    case 23: commands = [
                         `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
                         `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, 
                         `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
                     ]; break;
-                    case 24: commands = [ // <--- الإضافة الجديدة لـ FreeBSD 32-bit main (ld branch)
+                    case 24: commands = [
                         `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
                         `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
                         `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
                     ]; break;
-                    case 25: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit _start
+                    case 25: commands = [
                         `riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`,
                         `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`,
+                        `qemu-riscv64-static ./"${baseName}"`
+                    ]; break;
+                    case 26: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit main
+                        `riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`,
+                        `echo "Compilation & Linking done!"`,
                         `qemu-riscv64-static ./"${baseName}"`
                     ]; break;
                 }

@@ -187,10 +187,11 @@ async function checkDependencies(platform: string) {
                 { name: 'qemu-aarch64-static', cmd: 'qemu-aarch64-static --version' }, // إضافة فحص ARM64
                 { name: 'arm-none-eabi-as', cmd: 'arm-none-eabi-as --version' }, // إضافة فحص ARM32
                 { name: 'qemu-arm-static', cmd: 'qemu-arm-static --version' }, // إضافة فحص ARM32
-                { name: 'riscv64-as', cmd: 'riscv64-linux-gnu-as --version' }, // إضافة فحص RISC-V 64
-                { name: 'riscv64-gcc', cmd: 'riscv64-linux-gnu-gcc --version' }, // <--- الإضافة الجديدة فحص GCC لـ RISC-V 64
-                { name: 'riscv64-ld', cmd: 'riscv64-linux-gnu-ld -v' }, // إضافة فحص RISC-V 64
-                { name: 'qemu-riscv64-static', cmd: 'qemu-riscv64-static --version' } // إضافة فحص RISC-V 64 محاكي
+                { name: 'riscv64-as', cmd: 'riscv64-linux-gnu-as --version' }, // إضافة فحص RISC-V 64/32
+                { name: 'riscv64-gcc', cmd: 'riscv64-linux-gnu-gcc --version' }, // فحص GCC لـ RISC-V 64
+                { name: 'riscv64-ld', cmd: 'riscv64-linux-gnu-ld -v' }, // إضافة فحص RISC-V 64/32
+                { name: 'qemu-riscv64-static', cmd: 'qemu-riscv64-static --version' }, // إضافة فحص RISC-V 64 محاكي
+                { name: 'qemu-riscv32-static', cmd: 'qemu-riscv32-static --version' } // إضافة فحص RISC-V 32 محاكي
             ];
 
             const total = deps.length;
@@ -341,10 +342,14 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isWinArm64 = textLower.includes('win-arm64') || textLower.includes('windows arm64'); // إضافة التميز لـ Windows ARM64
     const isWinArm32 = textLower.includes('win-arm32') || textLower.includes('windows arm32'); // إضافة التميز لـ Windows ARM32
     const isMacArm64 = textLower.includes('mac-arm64') || textLower.includes('apple silicon'); // إضافة التميز لـ macOS ARM64
-    const isRiscv64 = textLower.includes('riscv64') || textLower.includes('ecall'); // إضافة لـ RISC-V 64
+    
+    // تمييز RISC-V 32-bit عن RISC-V 64-bit
+    const isRiscv32 = textLower.includes('rv32i') || textLower.includes('riscv32');
+    const isRiscv64 = (textLower.includes('riscv64') || textLower.includes('ecall')) && !isRiscv32;
 
     if (platform === 'linux') {
-        if (isRiscv64) return hasMain ? { index: 26, name: "Linux RISC-V 64-bit (main) (QEMU)" } : { index: 25, name: "Linux RISC-V 64-bit (_start) (QEMU)" }; // <--- تم التعديل لدعم main و _start
+        if (isRiscv32) return { index: 27, name: "Linux RV32I (_start) (QEMU)" }; // <--- الكشف التلقائي لـ RV32I
+        if (isRiscv64) return hasMain ? { index: 26, name: "Linux RISC-V 64-bit (main) (QEMU)" } : { index: 25, name: "Linux RISC-V 64-bit (_start) (QEMU)" };
         if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" };
         if (isWinArm32) return hasMain ? { index: 21, name: "win_arm32_main(compile but not run)" } : { index: 20, name: "win_arm32_start(compile but not run)" };
         if (isMacArm64) return { index: 22, name: "mac_arm64_main(compile but not run)" };
@@ -555,7 +560,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "23) FreeBSD 32-bit (_start) (compile but not run)",
                 "24) FreeBSD 32-bit (main) (compile but not run)", 
                 "25) Linux RISC-V 64-bit (_start) (QEMU)",
-                "26) Linux RISC-V 64-bit (main) (QEMU)" 
+                "26) Linux RISC-V 64-bit (main) (QEMU)",
+                "27) Linux RV32I (_start) (QEMU)"
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -578,12 +584,8 @@ export function activate(context: vscode.ExtensionContext) {
                 if (!pathResult) return; 
                 irvinePath = pathResult;
             }
-
-            // --- الإضافة الجديدة: فحص خيار الـ Linker الخاص بلينكس ---
             const linuxLinkerMethod = context.globalState.get<string>('linuxLinkerMethod') || 'ld';
-
             if (linuxLinkerMethod === 'gcc') {
-                // أوامر لينكس المقسمة (باستخدام gcc كـ Linker)
                 switch (selectedIndex) {
                     case 1: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `gcc "${baseName}.o" -o "${baseName}" -nostdlib`, `./"${baseName}"`]; break;
                     case 2: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `gcc "${baseName}.o" -o "${baseName}" -no-pie`, `./"${baseName}"`]; break;
@@ -595,85 +597,25 @@ export function activate(context: vscode.ExtensionContext) {
                     case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
                     case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
                     case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
-                    case 11: commands = [
-                        `nasm -f macho64 "${fileName}" -o "${baseName}.o"`, 
-                        `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, 
-                        `darling shell ./"${baseName}"`
-                    ]; break;
-                    case 12: commands = [
-                        `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
-                        `ld.lld -m elf_x86_64_fbsd "${baseName}.o" -o "${baseName}"`, 
-                        `qemu-x86_64-static ./"${baseName}"`
-                    ]; break;
-                    case 13: commands = [
-                        `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
-                        `ld.lld -m elf_x86_64_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
-                        `qemu-x86_64-static ./"${baseName}"`
-                    ]; break;
-                    case 14: commands = [
-                        `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
-                        `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, 
-                        `qemu-aarch64-static ./"${baseName}"`
-                    ]; break;
-                    case 15: commands = [
-                        `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
-                        `arm-none-eabi-ld "${baseName}.o" -o "${baseName}"`, 
-                        `qemu-arm-static ./"${baseName}"`
-                    ]; break;
-                    case 16: commands = [
-                        `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
-                        `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, 
-                        `qemu-aarch64-static ./"${baseName}"`
-                    ]; break;
-                    case 17: commands = [ 
-                        `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
-                        `arm-none-eabi-ld "${baseName}.o" -o "${baseName}" -e main`, 
-                        `qemu-arm-static ./"${baseName}"`
-                    ]; break;
-                    case 18: commands = [
-                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
-                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`
-                    ]; break;
-                    case 19: commands = [
-                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
-                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`
-                    ]; break;
-                    case 20: commands = [
-                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
-                        `echo "\\nNote: We have breached the realms of architectures.. The code is sound 32-bit, but the atoms of your x86_64 processor still refuse to dance to the rhythms of ARM32 Windows."`
-                    ]; break;
-                    case 21: commands = [
-                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
-                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device 😅"`
-                    ]; break;
-                    case 22:
-                        commands = [
-                            `aarch64-apple-darwin20.4-clang "${fileName}" -o "${baseName}"`,
-                            `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`
-                        ];
-                        break;
-                    case 23: commands = [
-                        `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
-                        `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, 
-                        `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
-                    ]; break;
-                    case 24: commands = [
-                        `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
-                        `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
-                        `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
-                    ]; break;
-                    case 25: commands = [
-                        `riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`,
-                        `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`,
-                        `qemu-riscv64-static ./"${baseName}"`
-                    ]; break;
-                    case 26: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit main
-                        `riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`,
-                        `qemu-riscv64-static ./"${baseName}"`
-                    ]; break;
+                    case 11: commands = [`nasm -f macho64 "${fileName}" -o "${baseName}.o"`, `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, `darling shell ./"${baseName}"`]; break;
+                    case 12: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_x86_64_fbsd "${baseName}.o" -o "${baseName}"`, `qemu-x86_64-static ./"${baseName}"`]; break;
+                    case 13: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_x86_64_fbsd -e main "${baseName}.o" -o "${baseName}"`, `qemu-x86_64-static ./"${baseName}"`]; break;
+                    case 14: commands = [`aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-aarch64-static ./"${baseName}"`]; break;
+                    case 15: commands = [`arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, `arm-none-eabi-ld "${baseName}.o" -o "${baseName}"`, `qemu-arm-static ./"${baseName}"`]; break;
+                    case 16: commands = [`aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, `qemu-aarch64-static ./"${baseName}"`]; break;
+                    case 17: commands = [`arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, `arm-none-eabi-ld "${baseName}.o" -o "${baseName}" -e main`, `qemu-arm-static ./"${baseName}"`]; break;
+                    case 18: commands = [`/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`, `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`]; break;
+                    case 19: commands = [`/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`, `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`]; break;
+                    case 20: commands = [`/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`, `echo "\\nNote: We have breached the realms of architectures.. The code is sound 32-bit, but the atoms of your x86_64 processor still refuse to dance to the rhythms of ARM32 Windows."`]; break;
+                    case 21: commands = [`/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`, `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device 😅"`]; break;
+                    case 22: commands = [`aarch64-apple-darwin20.4-clang "${fileName}" -o "${baseName}"`, `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`]; break;
+                    case 23: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`]; break;
+                    case 24: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`]; break;
+                    case 25: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
+                    case 26: commands = [`riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
+                    case 27: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32I
                 }
             } else {
-                // أوامر لينكس المقسمة (باستخدام ld القياسي)
                 switch (selectedIndex) {
                     case 1: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
                     case 2: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld -e main "${baseName}.o" -o "${baseName}"`, `./"${baseName}"`]; break;
@@ -685,82 +627,23 @@ export function activate(context: vscode.ExtensionContext) {
                     case 8: commands = [`uasm -q -coff -I"${irvinePath}" "${fileName}" -Fo"${baseName}.o"`, `i686-w64-mingw32-gcc "${baseName}.o" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
                     case 9: commands = [`nasm -f win32 "${fileName}" -o "${baseName}.obj"`, `i686-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-e_main`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
                     case 10: commands = [`nasm -f win64 "${fileName}" -o "${baseName}.obj"`, `x86_64-w64-mingw32-gcc "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 -Wl,-emain`, `WINEDEBUG=-all wine "${baseName}.exe"${wineSuffix}`]; break;
-                    case 11: commands = [
-                        `nasm -f macho64 "${fileName}" -o "${baseName}.o"`, 
-                        `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, 
-                        `darling shell ./"${baseName}"`
-                    ]; break;
-                    case 12: commands = [
-                        `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
-                        `ld.lld -m elf_x86_64_fbsd "${baseName}.o" -o "${baseName}"`, 
-                        `qemu-x86_64-static ./"${baseName}"`
-                    ]; break;
-                    case 13: commands = [
-                        `nasm -f elf64 "${fileName}" -o "${baseName}.o"`, 
-                        `ld.lld -m elf_x86_64_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
-                        `qemu-x86_64-static ./"${baseName}"`
-                    ]; break;
-                    case 14: commands = [
-                        `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
-                        `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, 
-                        `qemu-aarch64-static ./"${baseName}"`
-                    ]; break;
-                    case 15: commands = [
-                        `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
-                        `arm-none-eabi-ld "${baseName}.o" -o "${baseName}"`, 
-                        `qemu-arm-static ./"${baseName}"`
-                    ]; break;
-                    case 16: commands = [
-                        `aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, 
-                        `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, 
-                        `qemu-aarch64-static ./"${baseName}"`
-                    ]; break;
-                    case 17: commands = [ 
-                        `arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, 
-                        `arm-none-eabi-ld "${baseName}.o" -o "${baseName}" -e main`, 
-                        `qemu-arm-static ./"${baseName}"`
-                    ]; break;
-                    case 18: commands = [
-                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
-                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`
-                    ]; break;
-                    case 19: commands = [
-                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
-                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`
-                    ]; break;
-                    case 20: commands = [
-                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`,
-                        `echo "\\nNote: We have breached the realms of architectures.. The code is sound 32-bit, but the atoms of your x86_64 processor still refuse to dance to the rhythms of ARM32 Windows."`
-                    ]; break;
-                    case 21: commands = [
-                        `/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`,
-                        `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device 😅"`
-                    ]; break;
-                    case 22:
-                        commands = [
-                            `aarch64-apple-darwin20.4-clang "${fileName}" -o "${baseName}"`,
-                            `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`
-                        ];
-                        break;
-                    case 23: commands = [
-                        `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
-                        `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, 
-                        `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
-                    ]; break;
-                    case 24: commands = [
-                        `nasm -f elf32 "${fileName}" -o "${baseName}.o"`, 
-                        `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, 
-                        `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`
-                    ]; break;
-                    case 25: commands = [
-                        `riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`,
-                        `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`,
-                        `qemu-riscv64-static ./"${baseName}"`
-                    ]; break;
-                    case 26: commands = [ // <--- الإضافة الجديدة لـ RISC-V 64-bit main
-                        `riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`,
-                        `qemu-riscv64-static ./"${baseName}"`
-                    ]; break;
+                    case 11: commands = [`nasm -f macho64 "${fileName}" -o "${baseName}.o"`, `x86_64-apple-darwin20.4-ld "${baseName}.o" -o "${baseName}" -macosx_version_min 10.11 -lSystem -syslibroot /usr/local/SDK/MacOSX11.3.sdk`, `darling shell ./"${baseName}"`]; break;
+                    case 12: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_x86_64_fbsd "${baseName}.o" -o "${baseName}"`, `qemu-x86_64-static ./"${baseName}"`]; break;
+                    case 13: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_x86_64_fbsd -e main "${baseName}.o" -o "${baseName}"`, `qemu-x86_64-static ./"${baseName}"`]; break;
+                    case 14: commands = [`aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-aarch64-static ./"${baseName}"`]; break;
+                    case 15: commands = [`arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, `arm-none-eabi-ld "${baseName}.o" -o "${baseName}"`, `qemu-arm-static ./"${baseName}"`]; break;
+                    case 16: commands = [`aarch64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `aarch64-linux-gnu-ld "${baseName}.o" -o "${baseName}" -e main`, `qemu-aarch64-static ./"${baseName}"`]; break;
+                    case 17: commands = [`arm-none-eabi-as "${fileName}" -o "${baseName}.o"`, `arm-none-eabi-ld "${baseName}.o" -o "${baseName}" -e main`, `qemu-arm-static ./"${baseName}"`]; break;
+                    case 18: commands = [`/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`, `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`]; break;
+                    case 19: commands = [`/opt/llvm-mingw/llvm-mingw-ucrt/bin/aarch64-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`, `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM64 device 😅"`]; break;
+                    case 20: commands = [`/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -nostartfiles -lkernel32 -Wl,-e_start`, `echo "\\nNote: We have breached the realms of architectures.. The code is sound 32-bit, but the atoms of your x86_64 processor still refuse to dance to the rhythms of ARM32 Windows."`]; break;
+                    case 21: commands = [`/opt/llvm-mingw/llvm-mingw-ucrt/bin/armv7-w64-mingw32-clang "${fileName}" -o "${baseName}.exe" -lkernel32`, `echo "\\nPhysically impossible for the code to run, try it on a Windows ARM32 device 😅"`]; break;
+                    case 22: commands = [`aarch64-apple-darwin20.4-clang "${fileName}" -o "${baseName}"`, `echo "\\nIt is physically impossible to execute this binary. Your x86_64 processor is looking for an Apple Silicon heart to beat with this code. Try it on an M1/M2/M3 device!"`]; break;
+                    case 23: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_i386_fbsd "${baseName}.o" -o "${baseName}"`, `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`]; break;
+                    case 24: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`]; break;
+                    case 25: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
+                    case 26: commands = [`riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
+                    case 27: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32I
                 }
             }
         } else if (platform === 'win32') {

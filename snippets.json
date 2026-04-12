@@ -815,5 +815,30 @@
       "\tecall"
     ],
     "description": "Template for Linux RISC-V 32-bit Embedded (RV32E) using _start"
+  },
+  "Linux RV32E (main)": {
+    "prefix": "linux-riscv32e-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 32-bit (RV32E) using main on Linux!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\t/* sys_write (t0 = 64) - RV32E uses t0 (x5) instead of a7 (x17) */",
+      "\tli t0, 64           # رقم استدعاء النظام للكتابة",
+      "\tli a0, 1            # المخرجات القياسية (stdout)",
+      "\tla a1, msg          # عنوان الرسالة",
+      "\tli a2, len          # طول الرسالة",
+      "\tecall               # Environment Call (Syscall)",
+      "",
+      "\t/* sys_exit (t0 = 93) */",
+      "\tli t0, 93           # رقم استدعاء النظام للخروج",
+      "\tli a0, 0            # كود الخروج 0 (نجاح)",
+      "\tecall               # Environment Call (Syscall)"
+    ],
+    "description": "Template for Linux RISC-V 32-bit Embedded (RV32E) using main (No C-Lib)"
   }
 }

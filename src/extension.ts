@@ -349,7 +349,7 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const isRiscv64 = (textLower.includes('riscv64') || textLower.includes('ecall')) && !isRiscv32 && !isRiscv32e;
 
     if (platform === 'linux') {
-        if (isRiscv32e) return { index: 29, name: "Linux RV32E (_start) (QEMU)" }; 
+        if (isRiscv32e) return hasMain ? { index: 30, name: "Linux RV32E (main) (QEMU)" } : { index: 29, name: "Linux RV32E (_start) (QEMU)" }; // <--- الكشف التلقائي لـ RV32E
         if (isRiscv32) return hasMain ? { index: 28, name: "Linux RV32I (main) (QEMU)" } : { index: 27, name: "Linux RV32I (_start) (QEMU)" }; 
         if (isRiscv64) return hasMain ? { index: 26, name: "Linux RISC-V 64-bit (main) (QEMU)" } : { index: 25, name: "Linux RISC-V 64-bit (_start) (QEMU)" };
         if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" };
@@ -565,7 +565,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "26) Linux RISC-V 64-bit (main) (QEMU)",
                 "27) Linux RV32I (_start) (QEMU)",
                 "28) Linux RV32I (main) (QEMU)",
-                "29) Linux RV32E (_start) (QEMU)" // <--- الإضافة الجديدة لـ RV32E
+                "29) Linux RV32E (_start) (QEMU)",
+                "30) Linux RV32E (main) (QEMU)"
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -619,7 +620,8 @@ export function activate(context: vscode.ExtensionContext) {
                     case 26: commands = [`riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
                     case 27: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
                     case 28: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
-                    case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32E
+                    case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
+                    case 30: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
                 }
             } else {
                 switch (selectedIndex) {
@@ -651,7 +653,8 @@ export function activate(context: vscode.ExtensionContext) {
                     case 26: commands = [`riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
                     case 27: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
                     case 28: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
-                    case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32E
+                    case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
+                    case 30: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
                 }
             }
         } else if (platform === 'win32') {
@@ -685,29 +688,25 @@ export function activate(context: vscode.ExtensionContext) {
                 if (!pathResult) return;
                 irvinePath = pathResult;
             }
-
-            // --- الإضافة الجديدة: فحص واعتماد الطريقة الأنسب ---
             const linkerMethod = await detectBestWin32Linker(context);
 
             if (linkerMethod === 'ld') {
-                // أوامر الويندوز المقسمة (ld) مباشر بدون cmd /c مع إضافة --enable-stdcall-fixup
                 switch (selectedIndex) {
                     case 1: commands = [`C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -lkernel32 -luser32 --subsystem console --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
                     case 2: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
-                    case 3: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
+                    case 3: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
                     case 4: commands = [`C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -lkernel32 -luser32 -e _main --subsystem console --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
                     case 5: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e _main --enable-stdcall-fixup -L C:\\msys64\\mingw32\\lib`, `.\\${baseName}.exe`]; break;
-                    case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e main -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
+                    case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\ld.exe "${baseName}.obj" -o "${baseName}.exe" -lkernel32 -luser32 -e main -L C:\\msys64\\mingw64\\lib`, `.\\${baseName}.exe`]; break;
                 }
             } else {
-                // أوامر الويندوز المقسمة (gcc)
                 switch (selectedIndex) {
                     case 1: commands = [`C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}"`, `C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -w '-Wl,--subsystem,console'`, `.\\${baseName}.exe`]; break;
                     case 2: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `.\\${baseName}.exe`]; break;
                     case 3: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32`, `.\\${baseName}.exe`]; break;
                     case 4: commands = [`C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I"${irvinePath}" -Fo"${baseName}.obj" "${fileName}"`, `C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" "${path.join(irvinePath, 'Irvine32.lib')}" -o "${baseName}.exe" -nostdlib -lkernel32 -luser32 -w '-Wl,-e_main' '-Wl,--subsystem,console' '-Wl,--enable-stdcall-fixup' 2>$null`, `.\\${baseName}.exe`]; break;
                     case 5: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-e_main'`, `.\\${baseName}.exe`]; break;
-                    case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-emain'`, `.\\${baseName}.exe`]; break;
+                    case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-emain'`, `.\\${baseName}.exe`]; break;
                 }
             }
             // ----------------------------------------------------

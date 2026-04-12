@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.4.0/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.4.1/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20RISC-V%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,6 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 
 ## ✨ Features
+- **🪐 Linux RISC-V 32-bit (main) Support (New in v1.4.1!)**: The RISC-V circle is complete! You can now cross-compile and run RISC-V 32-bit (RV32I) Linux Assembly using the C-style `main` entry point. Utilizing a smart linking workaround, it bypasses 32/64-bit libc conflicts flawlessly on Linux!
 - **🪐 Linux RISC-V 32-bit (RV32I) Support (New in v1.4.0!)**: Shrink it down! You can now cross-compile and run RISC-V 32-bit (RV32I) Linux Assembly using the standard `_start` entry point directly from your Linux machine using `qemu-riscv32-static`.
 - **🪐 Linux RISC-V 64-bit Support (Updated in v1.3.9!)**: Enter the future of open hardware! You can now cross-compile and run RISC-V 64-bit Linux Assembly using both `_start` and the C-style `main` entry point directly from your Linux machine using `qemu-riscv64-static`.
 - **⚓ FreeBSD 32-bit (main) Support (New in v1.3.7!)**: We went deeper! You can now cross-compile FreeBSD 32-bit Assembly using the C-style `main` entry point. It fully supports FreeBSD's unique stack-based syscall convention right from your Linux terminal.
@@ -79,6 +80,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | `linux-riscv64-start` | Linux RISC-V 64-bit boilerplate using GNU Assembler (GAS) |
 | `linux-riscv64-main` | Linux RISC-V 64-bit boilerplate using `main` entry point |
 | `linux-riscv32-start` | Linux RISC-V 32-bit (RV32I) boilerplate using GNU Assembler (GAS) |
+| `linux-riscv32-main` | Linux RISC-V 32-bit (RV32I) boilerplate using `main` (No C-Lib) |
 
 ### 🦾 ARM Templates
 | Prefix | Description |
@@ -145,7 +147,7 @@ Ensure your system has an **MSYS2** environment set up with:
 ## 🎯 How to Use
 
 1. Open any Assembly file in VSCodium / VS Code.
-2. Type a snippet prefix (e.g., `linux-riscv32-start` or `linux-arm32-main`) and press `Tab`.
+2. Type a snippet prefix (e.g., `linux-riscv32-main` or `linux-arm32-main`) and press `Tab`.
 3. Click the drop-down arrow next to the **Play (Run)** button.
 4. Select **Run Assembly (ahmed_x86)**.
 5. Watch your code compile and run seamlessly!

@@ -717,5 +717,28 @@
       "\tecall               # Environment Call (Syscall)"
     ],
     "description": "Template for Linux RISC-V 64-bit using _start"
+  },
+  "linux_riscv64_main.s": {
+    "prefix": "linux-riscv64-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 64-bit (main)Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\t/* sys_write (a7 = 64) */",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\tli a0, 0",
+      "\tret"
+    ],
+    "description": "Template for Linux RISC-V 64-bit using main"
   }
 }

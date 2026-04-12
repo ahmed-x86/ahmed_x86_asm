@@ -790,5 +790,30 @@
       "\tecall"
     ],
     "description": "Template for Linux RISC-V 32-bit (RV32I) using main (No C-Lib)"
+  },
+  "Linux RV32E (_start)": {
+    "prefix": "linux-riscv32e-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 32-bit (RV32E)(_start) Linux!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\t/* sys_write (t0 = 64) - RV32E uses t0 (x5) instead of a7 (x17) */",
+      "\tli t0, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\t/* sys_exit (t0 = 93) */",
+      "\tli t0, 93",
+      "\tli a0, 0",
+      "\tecall"
+    ],
+    "description": "Template for Linux RISC-V 32-bit Embedded (RV32E) using _start"
   }
 }

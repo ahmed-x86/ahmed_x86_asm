@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.4.3/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.4.4/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20RISC-V%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,6 +25,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 
 ## ✨ Features
+- **🧹 Clean Snippets Logic (New in v1.4.4!)**: Speed up your workflow! All built-in templates have been decluttered by removing inline comments. You now get pure, production-ready code instantly upon pressing Tab, keeping your workspace professional and distraction-free.
 - **🪐 Linux RISC-V 32-bit Embedded (RV32E) Support (Updated in v1.4.3!)**: The embedded suite is complete! You can now cross-compile and run RV32E Linux Assembly using both `_start` and C-style `main` entry points. It features specialized logic to handle the 16-register constraint and `ilp32e` ABI syscall conventions.
 - **🪐 Linux RISC-V 32-bit (main) Support (New in v1.4.1!)**: The RISC-V circle is complete! You can now cross-compile and run RISC-V 32-bit (RV32I) Linux Assembly using the C-style `main` entry point. Utilizing a smart linking workaround, it bypasses 32/64-bit libc conflicts flawlessly on Linux!
 - **🪐 Linux RISC-V 32-bit (RV32I) Support (New in v1.4.0!)**: Shrink it down! You can now cross-compile and run RISC-V 32-bit (RV32I) Linux Assembly using the standard `_start` entry point directly from your Linux machine using `qemu-riscv32-static`.

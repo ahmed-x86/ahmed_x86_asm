@@ -6,3 +6,4 @@ node_modules
 ahmed-x86-asm-0.0.1.vsix
 test123/
 auto_release.py
+venv/

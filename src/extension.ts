@@ -335,20 +335,22 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
     const hasMain = textLower.includes('main proc') || textLower.includes('main:');
     const is64Bit = textLower.includes('bits 64') || textLower.includes('elf64') || textLower.includes('win64') || textLower.includes('rax');
     const isMac = textLower.includes('macho64');
-    const isFreeBSD = textLower.includes('freebsd') || textLower.includes('fbsd'); // تعرف تلقائي لـ FreeBSD
-    const isFreeBSD32 = textLower.includes('freebsd32') || textLower.includes('fbsd32'); // <--- الإضافة الجديدة هنا لـ FreeBSD 32
-    const isArm64 = textLower.includes('aarch64') || textLower.includes('x8'); // إضافة لـ ARM64
-    const isArm32 = textLower.includes('r7') || textLower.includes('svc #0'); // إضافة لـ ARM32
-    const isWinArm64 = textLower.includes('win-arm64') || textLower.includes('windows arm64'); // إضافة التميز لـ Windows ARM64
-    const isWinArm32 = textLower.includes('win-arm32') || textLower.includes('windows arm32'); // إضافة التميز لـ Windows ARM32
-    const isMacArm64 = textLower.includes('mac-arm64') || textLower.includes('apple silicon'); // إضافة التميز لـ macOS ARM64
+    const isFreeBSD = textLower.includes('freebsd') || textLower.includes('fbsd');
+    const isFreeBSD32 = textLower.includes('freebsd32') || textLower.includes('fbsd32');
+    const isArm64 = textLower.includes('aarch64') || textLower.includes('x8'); 
+    const isArm32 = textLower.includes('r7') || textLower.includes('svc #0');
+    const isWinArm64 = textLower.includes('win-arm64') || textLower.includes('windows arm64');
+    const isWinArm32 = textLower.includes('win-arm32') || textLower.includes('windows arm32');
+    const isMacArm64 = textLower.includes('mac-arm64') || textLower.includes('apple silicon');
     
-    // تمييز RISC-V 32-bit عن RISC-V 64-bit
-    const isRiscv32 = textLower.includes('rv32i') || textLower.includes('riscv32');
-    const isRiscv64 = (textLower.includes('riscv64') || textLower.includes('ecall')) && !isRiscv32;
+    // تمييز RISC-V 32-bit عن RISC-V 64-bit وعن RV32E
+    const isRiscv32e = textLower.includes('rv32e');
+    const isRiscv32 = (textLower.includes('rv32i') || textLower.includes('riscv32')) && !isRiscv32e;
+    const isRiscv64 = (textLower.includes('riscv64') || textLower.includes('ecall')) && !isRiscv32 && !isRiscv32e;
 
     if (platform === 'linux') {
-        if (isRiscv32) return hasMain ? { index: 28, name: "Linux RV32I (main) (QEMU)" } : { index: 27, name: "Linux RV32I (_start) (QEMU)" }; // <--- الكشف التلقائي لـ RV32I
+        if (isRiscv32e) return { index: 29, name: "Linux RV32E (_start) (QEMU)" }; 
+        if (isRiscv32) return hasMain ? { index: 28, name: "Linux RV32I (main) (QEMU)" } : { index: 27, name: "Linux RV32I (_start) (QEMU)" }; 
         if (isRiscv64) return hasMain ? { index: 26, name: "Linux RISC-V 64-bit (main) (QEMU)" } : { index: 25, name: "Linux RISC-V 64-bit (_start) (QEMU)" };
         if (isWinArm64) return hasMain ? { index: 19, name: "win_arm64_main(compile but not run)" } : { index: 18, name: "win_arm64_start(compile but not run)" };
         if (isWinArm32) return hasMain ? { index: 21, name: "win_arm32_main(compile but not run)" } : { index: 20, name: "win_arm32_start(compile but not run)" };
@@ -562,7 +564,8 @@ export function activate(context: vscode.ExtensionContext) {
                 "25) Linux RISC-V 64-bit (_start) (QEMU)",
                 "26) Linux RISC-V 64-bit (main) (QEMU)",
                 "27) Linux RV32I (_start) (QEMU)",
-                "28) Linux RV32I (main) (QEMU)"
+                "28) Linux RV32I (main) (QEMU)",
+                "29) Linux RV32E (_start) (QEMU)" // <--- الإضافة الجديدة لـ RV32E
             ];
 
             const selection = await vscode.window.showQuickPick(options, {
@@ -614,8 +617,9 @@ export function activate(context: vscode.ExtensionContext) {
                     case 24: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`]; break;
                     case 25: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
                     case 26: commands = [`riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
-                    case 27: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32I
-                    case 28: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32I main
+                    case 27: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
+                    case 28: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
+                    case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32E
                 }
             } else {
                 switch (selectedIndex) {
@@ -645,8 +649,9 @@ export function activate(context: vscode.ExtensionContext) {
                     case 24: commands = [`nasm -f elf32 "${fileName}" -o "${baseName}.o"`, `ld.lld -m elf_i386_fbsd -e main "${baseName}.o" -o "${baseName}"`, `echo "\\nNote: Compilation successful. Running on Linux via QEMU user-mode will fail silently due to Syscall calling convention mismatch 😅"`]; break;
                     case 25: commands = [`riscv64-linux-gnu-as "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld "${baseName}.o" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
                     case 26: commands = [`riscv64-linux-gnu-gcc -static "${fileName}" -o "${baseName}"`, `qemu-riscv64-static ./"${baseName}"`]; break;
-                    case 27: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32I
-                    case 28: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32I main
+                    case 27: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
+                    case 28: commands = [`riscv64-linux-gnu-as -march=rv32i -mabi=ilp32 "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; 
+                    case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break; // <--- الخيار الجديد RV32E
                 }
             }
         } else if (platform === 'win32') {

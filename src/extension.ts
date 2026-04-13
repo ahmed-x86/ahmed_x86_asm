@@ -718,18 +718,16 @@ export function activate(context: vscode.ExtensionContext) {
             // ----------------------------------------------------
         }
 
-        // --- الإضافة الجديدة: نظام بناء ذكي مع عرض كافة السجلات في الطرفية ---
         if (commands.length > 0) {
-            const assembleCmd = commands[0];                          // الأمر الأول: المجمع (nasm/uasm/gas)
-            const linkCmd = commands.length > 1 ? commands[1] : null; // الأمر الثاني: الرابط (ld/gcc)
-            const runCommands = commands.length > 2 ? commands.slice(2) : []; // الأوامر المتبقية: التشغيل
+            const assembleCmd = commands[0];
+            const linkCmd = commands.length > 1 ? commands[1] : null;
+            const runCommands = commands.length > 2 ? commands.slice(2) : [];
 
             vscode.window.withProgress({
                 location: vscode.ProgressLocation.Window,
                 title: "Building Assembly...",
             }, async () => {
                 
-                // تجهيز الطرفية أولاً لكي تظهر فيها الأوامر
                 let terminal = vscode.window.activeTerminal;
                 if (!terminal || terminal.name !== "ahmed_x86_asm") {
                     terminal = vscode.window.createTerminal("ahmed_x86_asm");

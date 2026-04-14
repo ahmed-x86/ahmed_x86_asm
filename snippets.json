@@ -1,50 +1,4 @@
 {
-  "Linux 32-bit (main)": {
-    "prefix": "linux32-main",
-    "body": [
-      "section .data",
-      "\tmsg db \"Success: Linux 32-bit (x86) is running perfectly on Arch!\", 10",
-      "\tlen equ $ - msg",
-      "",
-      "section .text",
-      "\tglobal main",
-      "",
-      "main:",
-      "\tmov eax, 4",
-      "\tmov ebx, 1",
-      "\tmov ecx, msg",
-      "\tmov edx, len",
-      "\tint 0x80",
-      "",
-      "\tmov eax, 1",
-      "\txor ebx, ebx",
-      "\tint 0x80"
-    ],
-    "description": "Template for Linux 32-bit using main"
-  },
-  "Linux 32-bit (_start)": {
-    "prefix": "linux32-start",
-    "body": [
-      "section .data",
-      "\tmsg db \"Hello from Linux 32-bit (x86) using standard _start!\", 10",
-      "\tlen equ $ - msg",
-      "",
-      "section .text",
-      "\tglobal _start",
-      "",
-      "_start:",
-      "\tmov eax, 4",
-      "\tmov ebx, 1",
-      "\tmov ecx, msg",
-      "\tmov edx, len",
-      "\tint 0x80",
-      "",
-      "\tmov eax, 1",
-      "\txor ebx, ebx",
-      "\tint 0x80"
-    ],
-    "description": "Template for Linux 32-bit using _start"
-  },
   "Linux 64-bit (main)": {
     "prefix": "linux64-main",
     "body": [
@@ -91,109 +45,53 @@
     ],
     "description": "Template for Linux 64-bit using _start (Arch BTW)"
   },
-  "Win32 Irvine (Task 6)": {
-    "prefix": "win32-irvine-main",
+  "Linux 32-bit (main)": {
+    "prefix": "linux32-main",
     "body": [
-      "INCLUDE Irvine32.inc",
-      "",
-      ".data",
-      "\tmsg BYTE \"1. Task 6 Success: Win32 Irvine with main is working perfectly!\", 0",
-      "",
-      ".code",
-      "main PROC",
-      "\tmov edx, OFFSET msg",
-      "\tcall WriteString",
-      "\tcall Crlf",
-      "\texit",
-      "main ENDP",
-      "END main"
-    ],
-    "description": "Win32 Irvine template with main"
-  },
-  "Win32 Irvine (Arch BTW)": {
-    "prefix": "win32-irvine",
-    "body": [
-      "INCLUDE Irvine32.inc",
-      "",
-      ".data",
-      "\tmsg BYTE \"hi i use arch btw from win32 (Irvine Edition)\", 0",
-      "",
-      ".code",
-      "main PROC",
-      "\tmov edx, OFFSET msg",
-      "\tcall WriteString",
-      "\tcall Crlf",
-      "\texit",
-      "main ENDP",
-      "END main"
-    ],
-    "description": "Win32 Irvine template (Arch BTW)"
-  },
-  "Win32 Standalone (main)": {
-    "prefix": "win32-std-main",
-    "body": [
-      "extern _GetStdHandle@4",
-      "extern _WriteFile@20",
-      "extern _ExitProcess@4",
-      "",
-      "global _main",
-      "",
       "section .data",
-      "\tmsg db \"2. Task 7 Success: Win32 Standalone works directly via Windows API!\", 10",
-      "\tmsg_len equ $ - msg",
-      "",
-      "section .bss",
-      "\twritten resd 1",
+      "\tmsg db \"Success: Linux 32-bit (x86) is running perfectly on Arch!\", 10",
+      "\tlen equ $ - msg",
       "",
       "section .text",
-      "_main:",
-      "\tpush -11",
-      "\tcall _GetStdHandle@4",
+      "\tglobal main",
       "",
-      "\tpush 0",
-      "\tpush written",
-      "\tpush msg_len",
-      "\tpush msg",
-      "\tpush eax",
-      "\tcall _WriteFile@20",
+      "main:",
+      "\tmov eax, 4",
+      "\tmov ebx, 1",
+      "\tmov ecx, msg",
+      "\tmov edx, len",
+      "\tint 0x80",
       "",
-      "\tpush 0",
-      "\tcall _ExitProcess@4"
+      "\tmov eax, 1",
+      "\txor ebx, ebx",
+      "\tint 0x80"
     ],
-    "description": "Win32 Standalone template using main and Windows API"
+    "description": "Template for Linux 32-bit using main"
   },
-  "Win32 Standalone (_start)": {
-    "prefix": "win32-std-start",
+  "Linux 32-bit (_start)": {
+    "prefix": "linux32-start",
     "body": [
       "section .data",
-      "\tmsg db 'hi i use arch btw from win32 windows 10 pro', 10, 0",
-      "\tmsg_len equ $-msg",
-      "",
-      "section .bss",
-      "\twritten resd 1",
+      "\tmsg db \"Hello from Linux 32-bit (x86) using standard _start!\", 10",
+      "\tlen equ $ - msg",
       "",
       "section .text",
       "\tglobal _start",
-      "\textern _GetStdHandle@4",
-      "\textern _WriteConsoleA@20",
-      "\textern _ExitProcess@4",
       "",
       "_start:",
-      "\tpush -11",
-      "\tcall _GetStdHandle@4",
+      "\tmov eax, 4",
+      "\tmov ebx, 1",
+      "\tmov ecx, msg",
+      "\tmov edx, len",
+      "\tint 0x80",
       "",
-      "\tpush 0",
-      "\tpush written",
-      "\tpush msg_len",
-      "\tpush msg",
-      "\tpush eax",
-      "\tcall _WriteConsoleA@20",
-      "",
-      "\tpush 0",
-      "\tcall _ExitProcess@4"
+      "\tmov eax, 1",
+      "\txor ebx, ebx",
+      "\tint 0x80"
     ],
-    "description": "Win32 Standalone template using _start"
+    "description": "Template for Linux 32-bit using _start"
   },
+
   "Win64 Standalone (main)": {
     "prefix": "win64-std-main",
     "body": [
@@ -263,6 +161,110 @@
     ],
     "description": "Win64 Standalone template using _start"
   },
+  "Win32 Standalone (main)": {
+    "prefix": "win32-std-main",
+    "body": [
+      "extern _GetStdHandle@4",
+      "extern _WriteFile@20",
+      "extern _ExitProcess@4",
+      "",
+      "global _main",
+      "",
+      "section .data",
+      "\tmsg db \"2. Task 7 Success: Win32 Standalone works directly via Windows API!\", 10",
+      "\tmsg_len equ $ - msg",
+      "",
+      "section .bss",
+      "\twritten resd 1",
+      "",
+      "section .text",
+      "_main:",
+      "\tpush -11",
+      "\tcall _GetStdHandle@4",
+      "",
+      "\tpush 0",
+      "\tpush written",
+      "\tpush msg_len",
+      "\tpush msg",
+      "\tpush eax",
+      "\tcall _WriteFile@20",
+      "",
+      "\tpush 0",
+      "\tcall _ExitProcess@4"
+    ],
+    "description": "Win32 Standalone template using main and Windows API"
+  },
+  "Win32 Standalone (_start)": {
+    "prefix": "win32-std-start",
+    "body": [
+      "section .data",
+      "\tmsg db 'hi i use arch btw from win32 windows 10 pro', 10, 0",
+      "\tmsg_len equ $-msg",
+      "",
+      "section .bss",
+      "\twritten resd 1",
+      "",
+      "section .text",
+      "\tglobal _start",
+      "\textern _GetStdHandle@4",
+      "\textern _WriteConsoleA@20",
+      "\textern _ExitProcess@4",
+      "",
+      "_start:",
+      "\tpush -11",
+      "\tcall _GetStdHandle@4",
+      "",
+      "\tpush 0",
+      "\tpush written",
+      "\tpush msg_len",
+      "\tpush msg",
+      "\tpush eax",
+      "\tcall _WriteConsoleA@20",
+      "",
+      "\tpush 0",
+      "\tcall _ExitProcess@4"
+    ],
+    "description": "Win32 Standalone template using _start"
+  },
+  "Win32 Irvine (Task 6)": {
+    "prefix": "win32-irvine-main",
+    "body": [
+      "INCLUDE Irvine32.inc",
+      "",
+      ".data",
+      "\tmsg BYTE \"1. Task 6 Success: Win32 Irvine with main is working perfectly!\", 0",
+      "",
+      ".code",
+      "main PROC",
+      "\tmov edx, OFFSET msg",
+      "\tcall WriteString",
+      "\tcall Crlf",
+      "\texit",
+      "main ENDP",
+      "END main"
+    ],
+    "description": "Win32 Irvine template with main"
+  },
+  "Win32 Irvine (Arch BTW)": {
+    "prefix": "win32-irvine",
+    "body": [
+      "INCLUDE Irvine32.inc",
+      "",
+      ".data",
+      "\tmsg BYTE \"hi i use arch btw from win32 (Irvine Edition)\", 0",
+      "",
+      ".code",
+      "main PROC",
+      "\tmov edx, OFFSET msg",
+      "\tcall WriteString",
+      "\tcall Crlf",
+      "\texit",
+      "main ENDP",
+      "END main"
+    ],
+    "description": "Win32 Irvine template (Arch BTW)"
+  },
+
   "macOS 64-bit (main)": {
     "prefix": "mac64-main",
     "body": [
@@ -290,29 +292,7 @@
     ],
     "description": "Template for macOS 64-bit using main (Apple official method)"
   },
-  "FreeBSD 64-bit (_start)": {
-    "prefix": "freebsd64-start",
-    "body": [
-      "section .data",
-      "\tmsg db \"Hello from FreeBSD 64-bit on Arch Linux!\", 10",
-      "\tlen equ $ - msg",
-      "",
-      "section .text",
-      "\tglobal _start",
-      "",
-      "_start:",
-      "\tmov rax, 4",
-      "\tmov rdi, 1",
-      "\tmov rsi, msg",
-      "\tmov rdx, len",
-      "\tsyscall",
-      "",
-      "\tmov rax, 1",
-      "\txor rdi, rdi",
-      "\tsyscall"
-    ],
-    "description": "Template for FreeBSD 64-bit using _start (Raw Syscalls)"
-  },
+
   "FreeBSD 64-bit (main)": {
     "prefix": "freebsd64-main",
     "body": [
@@ -336,29 +316,82 @@
     ],
     "description": "Template for FreeBSD 64-bit using main"
   },
-  "Linux ARM64 (_start)": {
-    "prefix": "linux-arm64-start",
+  "FreeBSD 64-bit (_start)": {
+    "prefix": "freebsd64-start",
     "body": [
-      ".data",
-      "\tmsg: .ascii \"Hello from ARM64 Linux on Arch!\\n\"",
-      "\tlen = . - msg",
+      "section .data",
+      "\tmsg db \"Hello from FreeBSD 64-bit on Arch Linux!\", 10",
+      "\tlen equ $ - msg",
       "",
-      ".text",
-      "\t.global _start",
+      "section .text",
+      "\tglobal _start",
       "",
       "_start:",
-      "\tmov x8, #64",
-      "\tmov x0, #1",
-      "\tldr x1, =msg",
-      "\tldr x2, =len",
-      "\tsvc #0",
+      "\tmov rax, 4",
+      "\tmov rdi, 1",
+      "\tmov rsi, msg",
+      "\tmov rdx, len",
+      "\tsyscall",
       "",
-      "\tmov x8, #93",
-      "\tmov x0, #0",
-      "\tsvc #0"
+      "\tmov rax, 1",
+      "\txor rdi, rdi",
+      "\tsyscall"
     ],
-    "description": "Template for Linux ARM64 using _start (GNU Assembler)"
+    "description": "Template for FreeBSD 64-bit using _start (Raw Syscalls)"
   },
+  "FreeBSD 32-bit (main)": {
+    "prefix": "freebsd32-main",
+    "body": [
+      "section .data",
+      "\tmsg db \"hi i use arch btw by freebsd32 (main)\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal main",
+      "",
+      "main:",
+      "\tpush dword len",
+      "\tpush dword msg",
+      "\tpush dword 1",
+      "\tpush dword 0",
+      "\tmov eax, 4",
+      "\tint 0x80",
+      "\tadd esp, 16",
+      "",
+      "\tpush dword 0",
+      "\tpush dword 0",
+      "\tmov eax, 1",
+      "\tint 0x80"
+    ],
+    "description": "Template for FreeBSD 32-bit using main"
+  },
+  "FreeBSD 32-bit (_start)": {
+    "prefix": "freebsd32-start",
+    "body": [
+      "section .data",
+      "\tmsg db \"Hello from FreeBSD 32-bit on Arch Linux!\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal _start",
+      "",
+      "_start:",
+      "\tpush dword len",
+      "\tpush dword msg",
+      "\tpush dword 1",
+      "\tpush dword 0",
+      "\tmov eax, 4",
+      "\tint 0x80",
+      "\tadd esp, 16",
+      "",
+      "\tpush dword 0",
+      "\tpush dword 0",
+      "\tmov eax, 1",
+      "\tint 0x80"
+    ],
+    "description": "Template for FreeBSD 32-bit using _start (Stack Syscalls)"
+  },
+
   "Linux ARM64 (main)": {
     "prefix": "linux-arm64-main",
     "body": [
@@ -383,28 +416,28 @@
     ],
     "description": "Template for Linux ARM64 using main (GNU Assembler)"
   },
-  "Linux ARM32 (_start)": {
-    "prefix": "linux-arm32-start",
+  "Linux ARM64 (_start)": {
+    "prefix": "linux-arm64-start",
     "body": [
       ".data",
-      "\tmsg: .ascii \"Hello from ARM32 Linux on Arch!\\n\"",
+      "\tmsg: .ascii \"Hello from ARM64 Linux on Arch!\\n\"",
       "\tlen = . - msg",
       "",
       ".text",
       "\t.global _start",
       "",
       "_start:",
-      "\tmov r7, #4",
-      "\tmov r0, #1",
-      "\tldr r1, =msg",
-      "\tldr r2, =len",
+      "\tmov x8, #64",
+      "\tmov x0, #1",
+      "\tldr x1, =msg",
+      "\tldr x2, =len",
       "\tsvc #0",
       "",
-      "\tmov r7, #1",
-      "\tmov r0, #0",
+      "\tmov x8, #93",
+      "\tmov x0, #0",
       "\tsvc #0"
     ],
-    "description": "Template for Linux ARM32 using _start (GNU Assembler)"
+    "description": "Template for Linux ARM64 using _start (GNU Assembler)"
   },
   "Linux ARM32 (main)": {
     "prefix": "linux-arm32-main",
@@ -429,37 +462,30 @@
     ],
     "description": "Template for Linux ARM32 using main (GNU Assembler)"
   },
-  "win_arm64_start": {
-    "prefix": "win-arm64-start",
+  "Linux ARM32 (_start)": {
+    "prefix": "linux-arm32-start",
     "body": [
       ".data",
-      "\tmsg: .ascii \"hi i use arch btw by win-arm64\\n\"",
+      "\tmsg: .ascii \"Hello from ARM32 Linux on Arch!\\n\"",
       "\tlen = . - msg",
-      "",
-      ".bss",
-      "\t.align 3",
-      "\twritten: .space 8",
       "",
       ".text",
       "\t.global _start",
       "",
       "_start:",
-      "\tsub sp, sp, #32",
+      "\tmov r7, #4",
+      "\tmov r0, #1",
+      "\tldr r1, =msg",
+      "\tldr r2, =len",
+      "\tsvc #0",
       "",
-      "\tmov x0, -11",
-      "\tbl GetStdHandle",
-      "",
-      "\tldr x1, =msg",
-      "\tldr x2, =len",
-      "\tldr x3, =written",
-      "\tmov x4, #0",
-      "\tbl WriteConsoleA",
-      "",
-      "\tmov x0, #0",
-      "\tbl ExitProcess"
+      "\tmov r7, #1",
+      "\tmov r0, #0",
+      "\tsvc #0"
     ],
-    "description": "Template for Windows ARM64 using _start"
+    "description": "Template for Linux ARM32 using _start (GNU Assembler)"
   },
+
   "win_arm64_main": {
     "prefix": "win-arm64-main",
     "body": [
@@ -493,37 +519,36 @@
     ],
     "description": "Template for Windows ARM64 using main"
   },
-  "win_arm32_start": {
-    "prefix": "win-arm32-start",
+  "win_arm64_start": {
+    "prefix": "win-arm64-start",
     "body": [
       ".data",
-      "\tmsg: .ascii \"hi i use arch btw by win-arm32\\n\"",
+      "\tmsg: .ascii \"hi i use arch btw by win-arm64\\n\"",
       "\tlen = . - msg",
       "",
       ".bss",
-      "\t.align 2",
-      "\twritten: .space 4",
+      "\t.align 3",
+      "\twritten: .space 8",
       "",
       ".text",
       "\t.global _start",
       "",
       "_start:",
-      "\tsub sp, sp, #16",
+      "\tsub sp, sp, #32",
       "",
-      "\tmov r0, #-11",
+      "\tmov x0, -11",
       "\tbl GetStdHandle",
       "",
-      "\tldr r1, =msg",
-      "\tldr r2, =len",
-      "\tldr r3, =written",
-      "\tmov r4, #0",
-      "\tstr r4, [sp]",
+      "\tldr x1, =msg",
+      "\tldr x2, =len",
+      "\tldr x3, =written",
+      "\tmov x4, #0",
       "\tbl WriteConsoleA",
       "",
-      "\tmov r0, #0",
+      "\tmov x0, #0",
       "\tbl ExitProcess"
     ],
-    "description": "Template for Windows ARM32 using _start"
+    "description": "Template for Windows ARM64 using _start"
   },
   "win_arm32_main": {
     "prefix": "win-arm32-main",
@@ -563,6 +588,39 @@
     ],
     "description": "Template for Windows ARM32 using main"
   },
+  "win_arm32_start": {
+    "prefix": "win-arm32-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"hi i use arch btw by win-arm32\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".bss",
+      "\t.align 2",
+      "\twritten: .space 4",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\tsub sp, sp, #16",
+      "",
+      "\tmov r0, #-11",
+      "\tbl GetStdHandle",
+      "",
+      "\tldr r1, =msg",
+      "\tldr r2, =len",
+      "\tldr r3, =written",
+      "\tmov r4, #0",
+      "\tstr r4, [sp]",
+      "\tbl WriteConsoleA",
+      "",
+      "\tmov r0, #0",
+      "\tbl ExitProcess"
+    ],
+    "description": "Template for Windows ARM32 using _start"
+  },
+
   "mac_arm64_main": {
     "prefix": "mac-arm64-main",
     "body": [
@@ -590,57 +648,28 @@
     ],
     "description": "Template for macOS ARM64 using main (Apple Silicon)"
   },
-  "FreeBSD 32-bit (_start)": {
-    "prefix": "freebsd32-start",
+
+  "linux_riscv64_main.s": {
+    "prefix": "linux-riscv64-main",
     "body": [
-      "section .data",
-      "\tmsg db \"Hello from FreeBSD 32-bit on Arch Linux!\", 10",
-      "\tlen equ $ - msg",
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 64-bit (main)Linux on Arch!\\n\"",
+      "\tlen = . - msg",
       "",
-      "section .text",
-      "\tglobal _start",
-      "",
-      "_start:",
-      "\tpush dword len",
-      "\tpush dword msg",
-      "\tpush dword 1",
-      "\tpush dword 0",
-      "\tmov eax, 4",
-      "\tint 0x80",
-      "\tadd esp, 16",
-      "",
-      "\tpush dword 0",
-      "\tpush dword 0",
-      "\tmov eax, 1",
-      "\tint 0x80"
-    ],
-    "description": "Template for FreeBSD 32-bit using _start (Stack Syscalls)"
-  },
-  "FreeBSD 32-bit (main)": {
-    "prefix": "freebsd32-main",
-    "body": [
-      "section .data",
-      "\tmsg db \"hi i use arch btw by freebsd32 (main)\", 10",
-      "\tlen equ $ - msg",
-      "",
-      "section .text",
-      "\tglobal main",
+      ".text",
+      "\t.global main",
       "",
       "main:",
-      "\tpush dword len",
-      "\tpush dword msg",
-      "\tpush dword 1",
-      "\tpush dword 0",
-      "\tmov eax, 4",
-      "\tint 0x80",
-      "\tadd esp, 16",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
       "",
-      "\tpush dword 0",
-      "\tpush dword 0",
-      "\tmov eax, 1",
-      "\tint 0x80"
+      "\tli a0, 0",
+      "\tret"
     ],
-    "description": "Template for FreeBSD 32-bit using main"
+    "description": "Template for Linux RISC-V 64-bit using main"
   },
   "linux_riscv64_start.s": {
     "prefix": "linux-riscv64-start",
@@ -665,11 +694,11 @@
     ],
     "description": "Template for Linux RISC-V 64-bit using _start"
   },
-  "linux_riscv64_main.s": {
-    "prefix": "linux-riscv64-main",
+  "Linux RV32I (main)": {
+    "prefix": "linux-riscv32-main",
     "body": [
       ".data",
-      "\tmsg: .ascii \"Hello from RISC-V 64-bit (main)Linux on Arch!\\n\"",
+      "\tmsg: .ascii \"Success: RISC-V 32-bit (RV32I) using main works!\\n\"",
       "\tlen = . - msg",
       "",
       ".text",
@@ -682,10 +711,11 @@
       "\tli a2, len",
       "\tecall",
       "",
+      "\tli a7, 93",
       "\tli a0, 0",
-      "\tret"
+      "\tecall"
     ],
-    "description": "Template for Linux RISC-V 64-bit using main"
+    "description": "Template for Linux RISC-V 32-bit (RV32I) using main (No C-Lib)"
   },
   "Linux RV32I (_start)": {
     "prefix": "linux-riscv32-start",
@@ -710,28 +740,28 @@
     ],
     "description": "Template for Linux RISC-V 32-bit (RV32I) using _start"
   },
-  "Linux RV32I (main)": {
-    "prefix": "linux-riscv32-main",
+  "Linux RV32E (main)": {
+    "prefix": "linux-riscv32e-main",
     "body": [
       ".data",
-      "\tmsg: .ascii \"Success: RISC-V 32-bit (RV32I) using main works!\\n\"",
+      "\tmsg: .ascii \"Hello from RISC-V 32-bit (RV32E) using main on Linux!\\n\"",
       "\tlen = . - msg",
       "",
       ".text",
       "\t.global main",
       "",
       "main:",
-      "\tli a7, 64",
+      "\tli t0, 64",
       "\tli a0, 1",
       "\tla a1, msg",
       "\tli a2, len",
       "\tecall",
       "",
-      "\tli a7, 93",
+      "\tli t0, 93",
       "\tli a0, 0",
       "\tecall"
     ],
-    "description": "Template for Linux RISC-V 32-bit (RV32I) using main (No C-Lib)"
+    "description": "Template for Linux RISC-V 32-bit Embedded (RV32E) using main (No C-Lib)"
   },
   "Linux RV32E (_start)": {
     "prefix": "linux-riscv32e-start",
@@ -756,28 +786,26 @@
     ],
     "description": "Template for Linux RISC-V 32-bit Embedded (RV32E) using _start"
   },
-  "Linux RV32E (main)": {
-    "prefix": "linux-riscv32e-main",
+  "Linux RV128 (main)": {
+    "prefix": "linux-riscv128-main",
     "body": [
       ".data",
-      "\tmsg: .ascii \"Hello from RISC-V 32-bit (RV32E) using main on Linux!\\n\"",
+      "\tmsg: .ascii \"Hello from RISC-V 128-bit Linux on Arch!\\n\"",
       "\tlen = . - msg",
       "",
       ".text",
       "\t.global main",
       "",
       "main:",
-      "\tli t0, 64",
+      "\tli a7, 64",
       "\tli a0, 1",
       "\tla a1, msg",
       "\tli a2, len",
       "\tecall",
-      "",
-      "\tli t0, 93",
       "\tli a0, 0",
-      "\tecall"
+      "\tret"
     ],
-    "description": "Template for Linux RISC-V 32-bit Embedded (RV32E) using main (No C-Lib)"
+    "description": "Template for Linux RISC-V 128-bit using main"
   },
   "Linux RV128 (_start)": {
     "prefix": "linux-riscv128-start",
@@ -801,26 +829,5 @@
       "\tecall"
     ],
     "description": "Template for Linux RISC-V 128-bit using _start"
-  },
-  "Linux RV128 (main)": {
-    "prefix": "linux-riscv128-main",
-    "body": [
-      ".data",
-      "\tmsg: .ascii \"Hello from RISC-V 128-bit Linux on Arch!\\n\"",
-      "\tlen = . - msg",
-      "",
-      ".text",
-      "\t.global main",
-      "",
-      "main:",
-      "\tli a7, 64",
-      "\tli a0, 1",
-      "\tla a1, msg",
-      "\tli a2, len",
-      "\tecall",
-      "\tli a0, 0",
-      "\tret"
-    ],
-    "description": "Template for Linux RISC-V 128-bit using main"
   }
 }

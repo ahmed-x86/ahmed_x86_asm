@@ -131,6 +131,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 | `win32-std-start` | Win32 pure Windows API using `_start` |
 | `win64-std-main` | Win64 pure Windows API using `main` |
 | `win64-std-start` | Win64 pure Windows API using `_start` |
+| `win64-std-main-irvine` | Win64 pure Windows API using `main` |
 
 ---
 

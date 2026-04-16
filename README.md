@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.4.6/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.4.7/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20RISC-V%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -20,11 +20,12 @@
   </a>
 </p>
 
-A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64, ARM64, ARM32, RISC-V, MIPS & FASM Assembly** code directly from your editor. Now supporting **Linux**, **Windows**, **macOS (via Darling)**, and **FreeBSD (via QEMU)** with a seamless cross-platform workflow for native and cross-platform Assembly development.
+A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly compile and run **x86/x64, ARM64, ARM32, RISC-V, MIPS & FASM Assembly** code directly from your editor. Now supporting **Linux**, **Windows**, **macOS**, and **FreeBSD** with a seamless cross-platform workflow for native and cross-platform Assembly development.
 
 ---
 
 ## ✨ Features
+- **🍎 Native macOS ARM64 (Apple Silicon) Support (New in v1.4.7!)**: The ultimate native experience! You can now compile, link, and run macOS ARM64 Assembly natively directly on your M1/M2/M3 Mac. The extension automatically detects the `darwin` environment and uses Apple's standard `as` and `ld` tools for blazing-fast execution without any emulation layers.
 - **🪐 Linux RISC-V 128-bit (main) Support (New in v1.4.6!)**: Pushing the limits even further! You can now cross-compile experimental RISC-V 128-bit (RV128) Linux Assembly using the C-style `main` entry point. It seamlessly links with the C Runtime using GCC and runs via QEMU directly from your terminal.
 - **🪐 Linux RISC-V 128-bit Support (New in v1.4.5!)**: Pushing the boundaries of architecture! You can now cross-compile and run experimental RISC-V 128-bit (RV128) Linux Assembly using the standard `_start` entry point directly from your Linux machine.
 - **🧹 Clean Snippets Logic (New in v1.4.4!)**: Speed up your workflow! All built-in templates have been decluttered by removing inline comments. You now get pure, production-ready code instantly upon pressing Tab, keeping your workspace professional and distraction-free.
@@ -34,7 +35,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 - **🪐 Linux RISC-V 64-bit Support (Updated in v1.3.9!)**: Enter the future of open hardware! You can now cross-compile and run RISC-V 64-bit Linux Assembly using both `_start` and the C-style `main` entry point directly from your Linux machine using `qemu-riscv64-static`.
 - **⚓ FreeBSD 32-bit (main) Support (New in v1.3.7!)**: We went deeper! You can now cross-compile FreeBSD 32-bit Assembly using the C-style `main` entry point. It fully supports FreeBSD's unique stack-based syscall convention right from your Linux terminal.
 - **⚓ FreeBSD 32-bit (x86) Support (New in v1.3.6!)**: The BSD collection expands! You can now cross-compile FreeBSD 32-bit Assembly using the standard `_start` entry point with Stack-based Syscalls directly from Linux.
-- **🍎 macOS ARM64 (Apple Silicon) Support (New in v1.3.5!)**: The ultimate breach! You can now cross-compile macOS ARM64 Assembly using the C-style `_main` entry point and `libSystem`. Perfect for building for M1/M2/M3 chips directly from your Arch Linux machine.
+- **🍎 macOS ARM64 (Apple Silicon) Cross-Compilation (New in v1.3.5!)**: The ultimate breach! You can now cross-compile macOS ARM64 Assembly using the C-style `_main` entry point and `libSystem`. Perfect for building for M1/M2/M3 chips directly from your Arch Linux machine.
 - **🦾 Windows ARM32 (main) Support (New in v1.3.4!)**: The ARM circle is now complete! You can now cross-compile Windows ARM32 (AArch32/armv7) Assembly using the C-style `main` entry point, allowing seamless integration with the C Runtime on 32-bit ARM hardware.
 - **🦾 Windows ARM32 Cross-Compilation (New in v1.3.3!)**: Breaking more physical boundaries! You can now cross-compile Windows ARM32 (AArch32/armv7) Assembly using `_start`. It compiles perfectly on Arch Linux, but reminds you that your x86_64 atoms still can't natively run ARM32 code!
 - **🦾 Windows ARM64 (main) Support (New in v1.3.2!)**: The saga continues! You can now cross-compile Windows ARM64 Assembly using the C-style `main` entry point. Perfect for projects integrating with the C Runtime on ARM hardware.
@@ -61,7 +62,7 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 - **🧠 Dynamic Irvine Path**: Persistent path saver for the `Irvine32.inc` library.
 - **📁 Broad Compatibility**: Automatically detects a wide range of assembly extensions (`.asm`, `.s`, `.S`, `.inc`, `.nasm`, `.masm`, `.uasm`, `.fasm`, `.mips`).
 
----
+
 
 ## 🎛️ Extension Commands
 You can access these features at any time via the **new Tools & Settings button (ℹ️)** next to the Play button, or via the Command Palette (`Ctrl + Shift + P`):
@@ -72,6 +73,7 @@ You can access these features at any time via the **new Tools & Settings button 
 - `Reset Irvine Library Path`: Clears your saved Irvine directory path.
 - `Change Linux/Win32 Linker Method`: Manually switch between `ld` and `gcc`.
 
+---
 ---
 
 ## 📝 Snippets & Templates
@@ -141,7 +143,7 @@ Stop writing boilerplate from scratch! Type any of the following prefixes in an 
 ### 🐧 For Linux Users:
 Ensure your system has the following dependencies installed:
 - `nasm`, `uasm`, `binutils` (ld), `mingw-w64-gcc`, `wine`.
-- **For macOS support:** `osxcross` (linker) and `darling` (runner).
+- **For macOS Cross-compilation:** `osxcross` (linker) and `darling` (runner).
 - **For FreeBSD support:** `lld` (linker) and `qemu-user-static` (runner).
 - **For Linux ARM64 support:** `aarch64-linux-gnu-binutils` and `qemu-aarch64-static`.
 - **For Linux ARM32 support:** `arm-none-eabi-binutils` and `qemu-arm-static`.
@@ -151,6 +153,10 @@ Ensure your system has the following dependencies installed:
 ### 🪟 For Windows Users:
 Ensure your system has an **MSYS2** environment set up with:
 - `mingw-w64` toolchains and `nasm.exe` in your PATH.
+
+### 🍎 For macOS Users:
+To natively compile and run ARM64 assembly on your Apple Silicon Mac, simply ensure you have the Xcode Command Line Tools installed (which provides `clang`, `as`, and `ld`):
+- Open your terminal and run: `xcode-select --install`
 
 ---
 

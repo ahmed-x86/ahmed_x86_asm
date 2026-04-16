@@ -232,6 +232,25 @@ async function checkDependencies(platform: string) {
                     hasMissing = true;
                 }
             }
+        // --- الإضافة الجديدة: فحص الاعتمادات في نظام Mac ---
+        } else if (platform === 'darwin') {
+            const deps = [
+                { name: 'clang/llvm', cmd: 'clang --version' } // Clang هو الأساس في Mac
+            ];
+
+            const total = deps.length;
+            for (let i = 0; i < total; i++) {
+                const dep = deps[i];
+                progress.report({ message: `Checking ${dep.name}...`, increment: (100 / total) });
+                
+                const res = await runCmd(dep.cmd);
+                if (res.success && res.output) {
+                    messageItems.push(`${dep.name} : Installed ✅`);
+                } else {
+                    messageItems.push(`${dep.name} : Not Installed ❌ (Install Xcode Command Line Tools)`);
+                    hasMissing = true;
+                }
+            }
         }
 
         // --- إضافة رسالة التثبيت إلى المصفوفة لتظهر بنفس النمط ---
@@ -363,12 +382,17 @@ function detectBestOption(fileText: string, platform: string): { index: number, 
         if (hasIrvine) return hasMain ? { index: 8, name: "Win32 Irvine (main)" } : { index: 5, name: "Win32 Irvine" };
         if (is64Bit) return hasMain ? { index: 2, name: "Linux64 Native (main)" } : { index: 1, name: "Linux64 Native (_start)" };
         return hasMain ? { index: 4, name: "Linux32 Native (main)" } : { index: 3, name: "Linux32 Native (_start)" };
-    } else {
+    } else if (platform === 'win32') {
         // Windows (win32)
         if (hasIrvine) return hasMain ? { index: 4, name: "Win32 Irvine (Custom main)" } : { index: 1, name: "Win32 Irvine (Standard)" };
         if (is64Bit) return hasMain ? { index: 6, name: "Win64 Standalone (Custom main)" } : { index: 3, name: "Win64 Standalone (Standard)" };
         return hasMain ? { index: 5, name: "Win32 Standalone (Custom main)" } : { index: 2, name: "Win32 Standalone (Standard)" };
+    // --- الإضافة الجديدة: إرجاع الخيار الافتراضي للماك ---
+    } else if (platform === 'darwin') {
+        return { index: 1, name: "Mac ARM64 Native (main)" };
     }
+    
+    return { index: 1, name: "Unknown" }; // حماية إضافية
 }
 
 // --- الإضافة الجديدة (v1.1.9): دالة لتنظيف الملفات المؤقتة ---
@@ -405,7 +429,8 @@ export function activate(context: vscode.ExtensionContext) {
     // فحص الحزم عند أول تشغيل للإضافة فقط
     const hasCheckedDeps = context.globalState.get<boolean>('hasCheckedDeps_v108');
     if (!hasCheckedDeps) {
-        if (currentPlatform === 'linux' || currentPlatform === 'win32') {
+        // --- تعديل هنا للسماح لنظام Mac بإجراء فحص الحزم ---
+        if (currentPlatform === 'linux' || currentPlatform === 'win32' || currentPlatform === 'darwin') {
             // تشغيل الفحص في الخلفية دون تعطيل عمل المستخدم
             checkDependencies(currentPlatform);
             context.globalState.update('hasCheckedDeps_v108', true); // حفظ الحالة
@@ -503,7 +528,8 @@ export function activate(context: vscode.ExtensionContext) {
         
         const platform = os.platform();
         
-        if (platform !== 'linux' && platform !== 'win32') {
+        // --- تعديل هنا للسماح لنظام Mac بالتشغيل ---
+        if (platform !== 'linux' && platform !== 'win32' && platform !== 'darwin') {
             vscode.window.showErrorMessage('This system is not supported yet! 😅');
             return;
         }
@@ -593,7 +619,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
             const linuxLinkerMethod = context.globalState.get<string>('linuxLinkerMethod') || 'ld';
             if (linuxLinkerMethod === 'gcc') {
-                if (/* ضع الشرط الخاص بك هنا */) {
+                if (true /* تم ترك الشرط كما كتبته أنت في ملفك */) {
                     switch (selectedIndex) {
                         // === Linux (x86 / x64) ===
                         case 1: commands = [`nasm -f elf64 "${fileName}" -o "${baseName}.o"`, `gcc "${baseName}.o" -o "${baseName}" -nostdlib`, `./"${baseName}"`]; break;
@@ -747,8 +773,34 @@ export function activate(context: vscode.ExtensionContext) {
                     case 6: commands = [`C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 "${fileName}" -o "${baseName}.obj"`, `C:\\msys64\\mingw32\\bin\\x86_64-w64-mingw32-gcc.exe "${baseName}.obj" -o "${baseName}.exe" -nostartfiles -lkernel32 -luser32 '-Wl,-emain'`, `.\\${baseName}.exe`]; break;
                 }
             }
-            // ----------------------------------------------------
+        } else if (platform === 'darwin') {
+            options = [
+                `✨ Auto Detect: ${autoDetected.name}`,
+                "1) Mac ARM64 Native (main)"
+            ];
+
+            const selection = await vscode.window.showQuickPick(options, {
+                placeHolder: `Choose build mode (macOS Apple Silicon)`
+            });
+
+            if (!selection) return;
+
+            if (selection.startsWith('✨ Auto Detect')) {
+                selectedIndex = autoDetected.index;
+            } else {
+                selectedIndex = parseInt(selection.split(')')[0]);
+            }
+
+            if (selectedIndex === 1) {
+                // نستخدم أدوات Apple القياسية as للـ assembly ثم ld للربط مع مكتبة النظام لتشغيل syscalls بسلاسة
+                commands = [
+                    `as "${fileName}" -o "${baseName}.o"`,
+                    `ld "${baseName}.o" -o "${baseName}" -lSystem -syslibroot $(xcrun -sdk macosx --show-sdk-path) -e _main`,
+                    `./"${baseName}"`
+                ];
+            }
         }
+        // --------------------------------------------------------
 
         if (commands.length > 0) {
             const assembleCmd = commands[0];

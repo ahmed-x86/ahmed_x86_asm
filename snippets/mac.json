@@ -1,0 +1,56 @@
+{
+  "macOS 64-bit (main)": {
+    "prefix": "mac64-main",
+    "body": [
+      "default rel",
+      "",
+      "global _main",
+      "extern _write",
+      "",
+      "section .data",
+      "\tmsg db \"Hello macOS 64-bit from Arch Linux! (The Apple Way)\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "_main:",
+      "\tsub rsp, 8",
+      "",
+      "\tmov rdi, 1",
+      "\tlea rsi, [msg]",
+      "\tmov rdx, len",
+      "\tcall _write",
+      "",
+      "\tadd rsp, 8",
+      "\txor rax, rax",
+      "\tret"
+    ],
+    "description": "Template for macOS 64-bit using main (Apple official method)"
+  },
+  "mac_arm64_main": {
+    "prefix": "mac-arm64-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"hi i use arch btw by mac-arm64\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _main",
+      "\t.align 2",
+      "",
+      "_main:",
+      "\tstp x29, x30, [sp, #-16]!",
+      "\tmov x29, sp",
+      "",
+      "\tmov x0, #1",
+      "\tadrp x1, msg@PAGE",
+      "\tadd x1, x1, msg@PAGEOFF",
+      "\tmov x2, len",
+      "\tbl _write",
+      "",
+      "\tmov x0, #0",
+      "\tldp x29, x30, [sp], #16",
+      "\tret"
+    ],
+    "description": "Template for macOS ARM64 using main (Apple Silicon)"
+  }
+}

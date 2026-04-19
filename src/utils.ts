@@ -66,3 +66,72 @@ export async function cleanUpTempFiles(fileDir: string, baseName: string) {
         }
     }
 }
+
+// ==========================================
+// 4. الدالة الجديدة: تسجيل المقتطفات (Snippets) بذكاء
+// ==========================================
+export function registerOSSpecificSnippets(context: vscode.ExtensionContext, currentPlatform: string) {
+    let snippetFiles: string[] = [];
+
+    // تحديد الملفات المسموح بها حسب نظام التشغيل
+    if (currentPlatform === 'win32') {
+        snippetFiles = ['windows.json'];
+    } else if (currentPlatform === 'darwin') {
+        snippetFiles = ['mac.json'];
+    } else {
+        // لينكس يشوف كل الملفات
+        snippetFiles = [
+            'linux.json', 
+            'windows.json', 
+            'mac.json', 
+            'freebsd.json', 
+            'arm.json', 
+            'riscv.json'
+        ];
+    }
+
+    // جميع اللغات التي ندعمها
+    const supportedLangs = ['assembly', 'asm', 'nasm', 'masm', 'uasm', 'fasm', 'arm', 'mips', 'riscv', 'gas', 'MASM', 'NASM', 'FASM', 'UASM', 'ARM', 'MIPS'];
+
+    // قراءة الملفات وتحويلها إلى مقتطفات برمجية (Autocomplete)
+    snippetFiles.forEach(fileName => {
+        const filePath = path.join(context.extensionPath, 'snippets', fileName);
+        
+        if (fs.existsSync(filePath)) {
+            try {
+                const fileContent = fs.readFileSync(filePath, 'utf8');
+                const snippetsData = JSON.parse(fileContent);
+
+                const provider = vscode.languages.registerCompletionItemProvider(supportedLangs, {
+                    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+                        const completionItems: vscode.CompletionItem[] = [];
+
+                        for (const snippetName in snippetsData) {
+                            const snippet = snippetsData[snippetName];
+                            
+                            // إنشاء العنصر الذي يظهر في القائمة المنسدلة
+                            const item = new vscode.CompletionItem(snippetName, vscode.CompletionItemKind.Snippet);
+                            
+                            // دمج مصفوفة الكود إلى نص واحد إذا كانت مصفوفة
+                            const snippetBody = Array.isArray(snippet.body) ? snippet.body.join('\n') : snippet.body;
+                            item.insertText = new vscode.SnippetString(snippetBody);
+                            
+                            // إضافة الوصف والاختصار (Prefix) للبحث
+                            item.detail = snippet.description || `Snippet from ${fileName}`;
+                            item.filterText = Array.isArray(snippet.prefix) ? snippet.prefix.join(' ') : snippet.prefix;
+
+                            completionItems.push(item);
+                        }
+
+                        return completionItems;
+                    }
+                });
+
+                // تسجيل الـ Provider ليقوم VS Code بمسحه عند إيقاف الإضافة
+                context.subscriptions.push(provider);
+            } catch (err) {
+                console.error(`ahmed-x86 ASM: Failed to load snippet file ${fileName}`, err);
+            }
+        }
+    });
+}

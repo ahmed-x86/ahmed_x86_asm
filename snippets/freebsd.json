@@ -1,0 +1,100 @@
+{
+  "FreeBSD 64-bit (main)": {
+    "prefix": "freebsd64-main",
+    "body": [
+      "section .data",
+      "\tmsg db \"Hello from FreeBSD 64-bit on Arch Linux!\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal main",
+      "",
+      "main:",
+      "\tmov rax, 4",
+      "\tmov rdi, 1",
+      "\tmov rsi, msg",
+      "\tmov rdx, len",
+      "\tsyscall",
+      "",
+      "\tmov rax, 1",
+      "\txor rdi, rdi",
+      "\tsyscall"
+    ],
+    "description": "Template for FreeBSD 64-bit using main"
+  },
+  "FreeBSD 64-bit (_start)": {
+    "prefix": "freebsd64-start",
+    "body": [
+      "section .data",
+      "\tmsg db \"Hello from FreeBSD 64-bit on Arch Linux!\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal _start",
+      "",
+      "_start:",
+      "\tmov rax, 4",
+      "\tmov rdi, 1",
+      "\tmov rsi, msg",
+      "\tmov rdx, len",
+      "\tsyscall",
+      "",
+      "\tmov rax, 1",
+      "\txor rdi, rdi",
+      "\tsyscall"
+    ],
+    "description": "Template for FreeBSD 64-bit using _start (Raw Syscalls)"
+  },
+  "FreeBSD 32-bit (main)": {
+    "prefix": "freebsd32-main",
+    "body": [
+      "section .data",
+      "\tmsg db \"hi i use arch btw by freebsd32 (main)\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal main",
+      "",
+      "main:",
+      "\tpush dword len",
+      "\tpush dword msg",
+      "\tpush dword 1",
+      "\tpush dword 0",
+      "\tmov eax, 4",
+      "\tint 0x80",
+      "\tadd esp, 16",
+      "",
+      "\tpush dword 0",
+      "\tpush dword 0",
+      "\tmov eax, 1",
+      "\tint 0x80"
+    ],
+    "description": "Template for FreeBSD 32-bit using main"
+  },
+  "FreeBSD 32-bit (_start)": {
+    "prefix": "freebsd32-start",
+    "body": [
+      "section .data",
+      "\tmsg db \"Hello from FreeBSD 32-bit on Arch Linux!\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal _start",
+      "",
+      "_start:",
+      "\tpush dword len",
+      "\tpush dword msg",
+      "\tpush dword 1",
+      "\tpush dword 0",
+      "\tmov eax, 4",
+      "\tint 0x80",
+      "\tadd esp, 16",
+      "",
+      "\tpush dword 0",
+      "\tpush dword 0",
+      "\tmov eax, 1",
+      "\tint 0x80"
+    ],
+    "description": "Template for FreeBSD 32-bit using _start (Stack Syscalls)"
+  }
+}

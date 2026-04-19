@@ -1,0 +1,94 @@
+{
+  "Linux 64-bit (main)": {
+    "prefix": "linux64-main",
+    "body": [
+      "section .data",
+      "\tmsg db \"Hello from Arch Linux (64-bit Native) using main!\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal main",
+      "",
+      "main:",
+      "\tmov rax, 1",
+      "\tmov rdi, 1",
+      "\tmov rsi, msg",
+      "\tmov rdx, len",
+      "\tsyscall",
+      "",
+      "\tmov rax, 60",
+      "\txor rdi, rdi",
+      "\tsyscall"
+    ],
+    "description": "Template for Linux 64-bit using main"
+  },
+  "Linux 64-bit (_start / Arch)": {
+    "prefix": ["linux64-start", "arch-start"],
+    "body": [
+      "section .data",
+      "\tmsg db 'i use Archlinux BTW from linux64',0Ah",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal _start",
+      "",
+      "_start:",
+      "\tmov rax, 1",
+      "\tmov rdi, 1",
+      "\tmov rsi, msg",
+      "\tmov rdx, len",
+      "\tsyscall",
+      "",
+      "\tmov rax, 60",
+      "\txor rdi, rdi",
+      "\tsyscall"
+    ],
+    "description": "Template for Linux 64-bit using _start (Arch BTW)"
+  },
+  "Linux 32-bit (main)": {
+    "prefix": "linux32-main",
+    "body": [
+      "section .data",
+      "\tmsg db \"Success: Linux 32-bit (x86) is running perfectly on Arch!\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal main",
+      "",
+      "main:",
+      "\tmov eax, 4",
+      "\tmov ebx, 1",
+      "\tmov ecx, msg",
+      "\tmov edx, len",
+      "\tint 0x80",
+      "",
+      "\tmov eax, 1",
+      "\txor ebx, ebx",
+      "\tint 0x80"
+    ],
+    "description": "Template for Linux 32-bit using main"
+  },
+  "Linux 32-bit (_start)": {
+    "prefix": "linux32-start",
+    "body": [
+      "section .data",
+      "\tmsg db \"Hello from Linux 32-bit (x86) using standard _start!\", 10",
+      "\tlen equ $ - msg",
+      "",
+      "section .text",
+      "\tglobal _start",
+      "",
+      "_start:",
+      "\tmov eax, 4",
+      "\tmov ebx, 1",
+      "\tmov ecx, msg",
+      "\tmov edx, len",
+      "\tint 0x80",
+      "",
+      "\tmov eax, 1",
+      "\txor ebx, ebx",
+      "\tint 0x80"
+    ],
+    "description": "Template for Linux 32-bit using _start"
+  }
+}

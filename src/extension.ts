@@ -6,11 +6,15 @@ import { checkLinuxDeps, handleLinuxBuild } from './platforms/linux';
 import { checkWindowsDeps, handleWindowsBuild } from './platforms/windows';
 import { checkMacDeps, handleMacBuild } from './platforms/darwin';
 
-// 2. استيراد دالة الأخطاء المشتركة
+// 2. استيراد دوال الأدوات و الأخطاء
 import { setupDiagnostics } from './diagnostics';
+import { registerOSSpecificSnippets } from './utils'; // <--- السطر الجديد
 
 export function activate(context: vscode.ExtensionContext) {
     const currentPlatform = os.platform();
+
+    // 🌟 تفعيل المقتطفات (Snippets) الذكية بناءً على نظام التشغيل الحالي
+    registerOSSpecificSnippets(context, currentPlatform);
 
     // 🌟 تهيئة نظام اكتشاف الأخطاء ورسم الدوائر الحمراء
     setupDiagnostics(context);

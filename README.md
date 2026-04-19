@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/badge/Version/1.4.8/blue?style=flat-square" alt="Version">
+  <img src="https://badgen.net/badge/Version/1.5.0/blue?style=flat-square" alt="Version">
   <img src="https://badgen.net/badge/Platform/Linux%20|%20Windows%20|%20macOS%20|%20FreeBSD%20|%20ARM64%20|%20ARM32%20|%20RISC-V%20|%20MIPS%20|%20FASM/cyan?style=flat-square" alt="Platform">
   <a href="https://github.com/ahmed-x86/ahmed_x86_asm/stargazers">
     <img src="https://img.shields.io/github/stars/ahmed-x86/ahmed_x86_asm?style=flat-square&color=yellow&logo=github" alt="GitHub Stars">
@@ -25,7 +25,8 @@ A powerful, all-in-one Visual Studio Code / VSCodium extension to instantly comp
 ---
 
 ## ✨ Features
-- **🏗️ Massive Core Refactoring & Modularization (New in v1.4.8!)**: The extension's internal architecture has been completely rewritten! Code is now intelligently modularized into platform-specific engines (Linux, Windows, macOS), drastically improving performance, maintainability, and paving the way for seamlessly integrating even more architectures in the future.
+- **🧠 Smart OS-Aware Snippets (New in v1.5.0!)**: Your autocomplete menu just got a whole lot cleaner! Snippets are now dynamically loaded based on your operating system. Windows users will only see Windows templates, macOS users will only see macOS templates, while Linux power users retain full access to everything (Linux, Windows, macOS, FreeBSD, ARM, RISC-V) for cross-compilation.
+- **🏗️ Massive Core Refactoring & Modularization (Updated in v1.4.8!)**: The extension's internal architecture has been completely rewritten! Code is now intelligently modularized into platform-specific engines (Linux, Windows, macOS), drastically improving performance, maintainability, and paving the way for seamlessly integrating even more architectures in the future.
 - **🍎 Native macOS ARM64 (Apple Silicon) Support (New in v1.4.7!)**: The ultimate native experience! You can now compile, link, and run macOS ARM64 Assembly natively directly on your M1/M2/M3 Mac. The extension automatically detects the `darwin` environment and uses Apple's standard `as` and `ld` tools for blazing-fast execution without any emulation layers.
 - **🪐 Linux RISC-V 128-bit (main) Support (New in v1.4.6!)**: Pushing the limits even further! You can now cross-compile experimental RISC-V 128-bit (RV128) Linux Assembly using the C-style `main` entry point. It seamlessly links with the C Runtime using GCC and runs via QEMU directly from your terminal.
 - **🪐 Linux RISC-V 128-bit Support (New in v1.4.5!)**: Pushing the boundaries of architecture! You can now cross-compile and run experimental RISC-V 128-bit (RV128) Linux Assembly using the standard `_start` entry point directly from your Linux machine.

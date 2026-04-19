@@ -1,0 +1,183 @@
+{
+  "linux_riscv64_main.s": {
+    "prefix": "linux-riscv64-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 64-bit (main)Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\tli a0, 0",
+      "\tret"
+    ],
+    "description": "Template for Linux RISC-V 64-bit using main"
+  },
+  "linux_riscv64_start.s": {
+    "prefix": "linux-riscv64-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 64-bit Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\tli a7, 93",
+      "\tli a0, 0",
+      "\tecall"
+    ],
+    "description": "Template for Linux RISC-V 64-bit using _start"
+  },
+  "Linux RV32I (main)": {
+    "prefix": "linux-riscv32-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Success: RISC-V 32-bit (RV32I) using main works!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\tli a7, 93",
+      "\tli a0, 0",
+      "\tecall"
+    ],
+    "description": "Template for Linux RISC-V 32-bit (RV32I) using main (No C-Lib)"
+  },
+  "Linux RV32I (_start)": {
+    "prefix": "linux-riscv32-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 32-bit (RV32I) Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\tli a7, 93",
+      "\tli a0, 0",
+      "\tecall"
+    ],
+    "description": "Template for Linux RISC-V 32-bit (RV32I) using _start"
+  },
+  "Linux RV32E (main)": {
+    "prefix": "linux-riscv32e-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 32-bit (RV32E) using main on Linux!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\tli t0, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\tli t0, 93",
+      "\tli a0, 0",
+      "\tecall"
+    ],
+    "description": "Template for Linux RISC-V 32-bit Embedded (RV32E) using main (No C-Lib)"
+  },
+  "Linux RV32E (_start)": {
+    "prefix": "linux-riscv32e-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 32-bit (RV32E)(_start) Linux!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\tli t0, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\tli t0, 93",
+      "\tli a0, 0",
+      "\tecall"
+    ],
+    "description": "Template for Linux RISC-V 32-bit Embedded (RV32E) using _start"
+  },
+  "Linux RV128 (main)": {
+    "prefix": "linux-riscv128-main",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 128-bit Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global main",
+      "",
+      "main:",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "\tli a0, 0",
+      "\tret"
+    ],
+    "description": "Template for Linux RISC-V 128-bit using main"
+  },
+  "Linux RV128 (_start)": {
+    "prefix": "linux-riscv128-start",
+    "body": [
+      ".data",
+      "\tmsg: .ascii \"Hello from RISC-V 128-bit Linux on Arch!\\n\"",
+      "\tlen = . - msg",
+      "",
+      ".text",
+      "\t.global _start",
+      "",
+      "_start:",
+      "\tli a7, 64",
+      "\tli a0, 1",
+      "\tla a1, msg",
+      "\tli a2, len",
+      "\tecall",
+      "",
+      "\tli a7, 93",
+      "\tli a0, 0",
+      "\tecall"
+    ],
+    "description": "Template for Linux RISC-V 128-bit using _start"
+  }
+}

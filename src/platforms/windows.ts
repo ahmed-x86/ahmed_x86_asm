@@ -6,7 +6,7 @@ import * as os from 'os';
 import { runCmd, cleanUpTempFiles, getIrvinePath } from '../utils';
 import { assembleAndDiagnose } from '../diagnostics';
 
-// 1. دالة فحص الاعتماديات الخاصة بالويندوز
+
 export async function checkWindowsDeps() {
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,

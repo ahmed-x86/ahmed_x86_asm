@@ -57,7 +57,7 @@ export function detectMacOption(): { index: number, name: string } {
     return { index: 1, name: "Mac ARM64 Native (main)" };
 }
 
-// 3. الدالة الرئيسية لتشغيل الكود على الماك
+
 export async function handleMacBuild(context: vscode.ExtensionContext, editor: vscode.TextEditor) {
     const filePath = editor.document.fileName;
     const fileDir = path.dirname(filePath);

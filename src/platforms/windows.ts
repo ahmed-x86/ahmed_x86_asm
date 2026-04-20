@@ -105,7 +105,7 @@ export async function detectBestWin32Linker(context: vscode.ExtensionContext): P
     });
 }
 
-// 3. دالة التعرف التلقائي الخاصة بالويندوز
+
 export function detectWindowsOption(fileText: string): { index: number, name: string } {
     const textLower = fileText.toLowerCase();
     

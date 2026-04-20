@@ -52,7 +52,7 @@ export async function checkMacDeps() {
     });
 }
 
-// 2. دالة التعرف التلقائي الخاصة بالماك
+
 export function detectMacOption(): { index: number, name: string } {
     return { index: 1, name: "Mac ARM64 Native (main)" };
 }

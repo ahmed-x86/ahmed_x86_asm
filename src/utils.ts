@@ -67,9 +67,7 @@ export async function cleanUpTempFiles(fileDir: string, baseName: string) {
     }
 }
 
-// ==========================================
-// 4. الدالة الجديدة: تسجيل المقتطفات (Snippets) بذكاء
-// ==========================================
+
 export function registerOSSpecificSnippets(context: vscode.ExtensionContext, currentPlatform: string) {
     let snippetFiles: string[] = [];
 

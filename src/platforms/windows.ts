@@ -61,7 +61,7 @@ export async function checkWindowsDeps() {
     });
 }
 
-// 2. دالة الاختبار الصامت لاختيار أفضل طريقة ربط (Linker) في الويندوز
+
 export async function detectBestWin32Linker(context: vscode.ExtensionContext): Promise<string> {
     let method = context.globalState.get<string>('win32LinkerMethod');
     if (method) return method;

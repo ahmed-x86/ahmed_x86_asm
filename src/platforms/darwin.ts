@@ -4,7 +4,7 @@ import * as cp from 'child_process';
 import { runCmd, cleanUpTempFiles } from '../utils';
 import { assembleAndDiagnose } from '../diagnostics';
 
-// 1. دالة فحص الاعتماديات الخاصة بالماك
+
 export async function checkMacDeps() {
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,

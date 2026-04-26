@@ -255,7 +255,7 @@ export async function handleLinuxBuild(context: vscode.ExtensionContext, editor:
             case 29: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
             case 30: commands = [`riscv64-linux-gnu-as -march=rv32e -mabi=ilp32e "${fileName}" -o "${baseName}.o"`, `riscv64-linux-gnu-ld -m elf32lriscv -e main "${baseName}.o" -o "${baseName}"`, `qemu-riscv32-static ./"${baseName}"`]; break;
             
-            // التعديل: استبدال الأوامر غير المنطقية برسالة توضيحية لـ RV128
+            
             case 31: commands = [`echo "Compilation skipped."`, `echo "\\nNote: RISC-V 128-bit (RV128) is highly experimental and not fully supported by standard GCC/QEMU toolchains yet! 😅"`]; break;
             case 32: commands = [`echo "Compilation skipped."`, `echo "\\nNote: RISC-V 128-bit (RV128) is highly experimental and not fully supported by standard GCC/QEMU toolchains yet! 😅"`]; break;
         }

@@ -105,10 +105,29 @@
       {
         "id": "assembly",
         "extensions": [
-          ".asm", ".s", ".S", ".inc", ".nasm", ".masm", ".uasm", ".fasm", ".mips", ".arm", ".riscv"
+          ".asm",
+          ".s",
+          ".S",
+          ".inc",
+          ".nasm",
+          ".masm",
+          ".uasm",
+          ".fasm",
+          ".mips",
+          ".arm",
+          ".riscv"
         ],
         "aliases": [
-          "Assembly", "asm", "x86 Assembly", "NASM", "MASM", "UASM", "FASM", "ARM Assembly", "MIPS Assembly", "GAS"
+          "Assembly",
+          "asm",
+          "x86 Assembly",
+          "NASM",
+          "MASM",
+          "UASM",
+          "FASM",
+          "ARM Assembly",
+          "MIPS Assembly",
+          "GAS"
         ]
       }
     ],
@@ -187,7 +206,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "22.x",
+    "@types/node": "^22.19.19",
     "@types/vscode": "^1.108.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
